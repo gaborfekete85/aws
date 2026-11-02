@@ -137,7 +137,8 @@ resource "aws_iam_role_policy_attachment" "plan_state" {
 }
 
 # ReadOnlyAccess includes data-plane reads Terraform never needs; deny them so a
-# PR workflow cannot exfiltrate application data. lambda:GetFunction and
+# PR workflow cannot exfiltrate application data. lambda:GetFunction (exposes
+# env vars + code URL; no secrets live there by design) and
 # ssm:GetParameter stay allowed because `terraform plan` refresh needs them;
 # SecureString values stay unreadable because kms:Decrypt is denied, and secret
 # parameters are written with value_wo so they never reach state.
@@ -150,13 +151,14 @@ data "aws_iam_policy_document" "plan_guardrails" {
       "dynamodb:GetRecords", "dynamodb:ExportTableToPointInTime",
       "sqs:ReceiveMessage",
       "secretsmanager:GetSecretValue",
-      "rds:DownloadDBLogFilePortion",
+      "rds:DownloadDBLogFilePortion", "rds:DownloadCompleteDBLogFile",
       "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery",
       "logs:GetLogRecord", "logs:GetQueryResults", "logs:StartLiveTail",
       "dynamodb:PartiQLSelect", "dynamodb:ExecuteStatement", "dynamodb:BatchExecuteStatement",
       "cognito-idp:AdminGetUser", "cognito-idp:ListUsers", "cognito-idp:ListUsersInGroup",
-      "cognito-idp:AdminListGroupsForUser",
-      "ses:GetTemplate",
+      "cognito-idp:AdminListGroupsForUser", "cognito-idp:AdminListUserAuthEvents",
+      "cognito-idp:AdminListDevices", "cognito-idp:AdminGetDevice",
+      "ses:GetTemplate", "ses:GetEmailTemplate",
       "kms:Decrypt",
     ]
     resources = ["*"]
