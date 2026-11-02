@@ -1,0 +1,3 @@
+# Four Lambda services communicating via EventBridge
+
+The backend is split into Catalog, Booking, Payments and Notifications services (Python, Lambdalizator, behind API Gateway). Services never call each other synchronously; they publish domain events (`EventPublished`, `EventCancelled`, `BookingRequested`, `PaymentSucceeded`, `BookingConfirmed`, …) on a single custom EventBridge bus. Identity is delegated to Cognito (groups `admin`, `organizer`) rather than a service of its own. Chosen to demonstrate event-driven microservices and DDD bounded contexts; a modular monolith would be simpler but would not exercise the required stack.
