@@ -93,8 +93,16 @@ resource "aws_apigatewayv2_route" "this" {
   api_id             = var.api.api_id
   route_key          = each.key
   target             = "integrations/${aws_apigatewayv2_integration.this[0].id}"
-  authorization_type = each.value.public || var.api.authorizer_id == null ? "NONE" : "JWT"
+  authorization_type = each.value.public ? "NONE" : "JWT"
   authorizer_id      = each.value.public ? null : var.api.authorizer_id
+
+  lifecycle {
+    # Fail closed: a protected route must never silently become public.
+    precondition {
+      condition     = each.value.public || var.api.authorizer_id != null
+      error_message = "Route ${each.key} is not public but the API has no JWT authorizer."
+    }
+  }
 }
 
 resource "aws_lambda_permission" "api" {
