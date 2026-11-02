@@ -46,3 +46,13 @@ terraform fmt -recursive infra
 # Git hooks
 uvx pre-commit install
 ```
+
+## CI/CD (GitHub Actions)
+
+| Workflow | Trigger | Does |
+|---|---|---|
+| `ci.yml` | every PR + push to `main` | ruff, mypy, pytest (with Postgres/PostGIS + DynamoDB Local services), eslint, tsc, Vitest, `terraform fmt -check`, `validate`, tflint |
+| `terraform-plan.yml` | PRs touching infra/services | `terraform plan` for dev and prod with the read-only plan role; posts/updates one comment per env |
+| `deploy.yml` | push to `main` | build Lambda zips → `apply` dev (deploys Lambda code) → post-deploy integration tests → `apply` prod after a required reviewer approves the `prod` Environment |
+
+Per-environment `concurrency` groups (`deploy-dev`, `deploy-prod`, never cancelled mid-apply) plus S3 state locking prevent overlapping applies. Plan and deploy jobs are skipped until the bootstrap role variables exist (see `infra/bootstrap/README.md`).

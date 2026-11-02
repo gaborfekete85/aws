@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  python:
+    name: Python (ruff, mypy, pytest)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: localbini
+          POSTGRES_PASSWORD: localbini
+          POSTGRES_DB: catalog
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U localbini -d catalog"
+          --health-interval 2s --health-retries 30
+      dynamodb:
+        image: amazon/dynamodb-local:2.5.3
+        ports: ["8000:8000"]
+    env:
+      DATABASE_URL: postgresql+psycopg://localbini:localbini@localhost:5432/catalog
+      DYNAMODB_ENDPOINT_URL: http://localhost:8000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy services
+      - run: uv run pytest --cov=services --cov-report=term-missing:skip-covered
+
+  web:
+    name: Web (eslint, tsc, Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run test
+      - run: bun run build
+
+  terraform:
+    name: Terraform (fmt, validate, tflint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.15"
+      - uses: astral-sh/setup-uv@v5
+      - run: terraform fmt -check -recursive infra
+      - name: Build Lambda packages (validate needs the zips)
+        run: scripts/build_all_lambdas.sh
+      - name: validate
+        run: |
+          for root in infra/bootstrap infra/envs/dev infra/envs/prod; do
+            terraform -chdir=$root init -backend=false -input=false
+            terraform -chdir=$root validate
+          done
+      - uses: terraform-linters/setup-tflint@v4
+      - working-directory: infra
+        run: |
+          tflint --init
+          tflint --recursive

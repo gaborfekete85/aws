@@ -1,0 +1,94 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    name: Build Lambda packages
+    if: vars.AWS_DEPLOY_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: scripts/build_all_lambdas.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-packages
+          path: dist/*.zip
+          retention-days: 7
+
+  dev:
+    name: Deploy dev
+    needs: build
+    runs-on: ubuntu-latest
+    environment: dev
+    # One apply per environment at a time; never cancel an apply mid-flight.
+    concurrency:
+      group: deploy-dev
+      cancel-in-progress: false
+    outputs:
+      api_endpoint: ${{ steps.out.outputs.api_endpoint }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-packages
+          path: dist
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.15"
+          terraform_wrapper: false
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+      - name: terraform apply (infra + Lambda code)
+        working-directory: infra/envs/dev
+        run: |
+          terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+          terraform apply -input=false -auto-approve -lock-timeout=300s
+      - id: out
+        working-directory: infra/envs/dev
+        run: echo "api_endpoint=$(terraform output -raw api_endpoint)" >> "$GITHUB_OUTPUT"
+      - uses: astral-sh/setup-uv@v5
+      - name: Post-deploy integration tests
+        env:
+          API_BASE_URL: ${{ steps.out.outputs.api_endpoint }}
+        run: |
+          uv sync --frozen
+          uv run pytest tests/integration -m dev -v
+
+  prod:
+    name: Deploy prod
+    needs: [build, dev]
+    runs-on: ubuntu-latest
+    environment: prod   # required reviewer configured on the GitHub Environment
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-packages
+          path: dist
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.15"
+          terraform_wrapper: false
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+      - name: terraform apply
+        working-directory: infra/envs/prod
+        run: |
+          terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+          terraform apply -input=false -auto-approve -lock-timeout=300s
