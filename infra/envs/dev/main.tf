@@ -1,0 +1,9 @@
+module "stack" {
+  source                      = "../../modules/stack"
+  env                         = "dev"
+  vpc_cidr                    = "10.20.0.0/16"
+  nat                         = "instance"
+  interface_endpoint_az_count = 1
+  budget_usd                  = 40
+  alert_emails                = var.alert_emails
+}

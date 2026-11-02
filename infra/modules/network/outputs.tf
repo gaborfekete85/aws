@@ -1,0 +1,19 @@
+output "vpc_id" {
+  description = "VPC id."
+  value       = aws_vpc.this.id
+}
+
+output "vpc_cidr_block" {
+  description = "VPC CIDR."
+  value       = aws_vpc.this.cidr_block
+}
+
+output "private_subnet_ids" {
+  description = "Private subnet ids (Lambdas, RDS)."
+  value       = aws_subnet.private[*].id
+}
+
+output "lambda_security_group_id" {
+  description = "Security group for in-VPC Lambdas."
+  value       = aws_security_group.lambda.id
+}

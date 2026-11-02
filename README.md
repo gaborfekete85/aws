@@ -41,6 +41,7 @@ bun run lint && bun run typecheck
 # Terraform
 terraform -chdir=infra/envs/dev init -backend=false && terraform -chdir=infra/envs/dev validate
 terraform fmt -recursive infra
+(cd infra && tflint --init && tflint --recursive)   # lints every module directly
 
 # Git hooks
 uvx pre-commit install
