@@ -22,7 +22,7 @@ def http_api_event(
     path = route.format(**path_params)
     mv_query = {k: v if isinstance(v, list) else [v] for k, v in query.items()} if query else None
     hdrs = {"content-type": "application/json", **(headers or {})}
-    authorizer = {"jwt": {"claims": claims, "scopes": None}} if claims else None
+    authorizer = {"claims": claims, "scopes": None} if claims else None
     return {
         "version": "1.0",
         "resource": route,

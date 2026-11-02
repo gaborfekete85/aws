@@ -14,6 +14,7 @@ from lbz.response import Response
 from pydantic import BaseModel
 from pydantic import ValidationError as PydanticValidationError
 
+from localbini_shared.auth import Principal, principal_from_request_context
 from localbini_shared.errors import DomainError, to_http_error
 from localbini_shared.logging import bind_request, configure_logging, get_logger
 
@@ -73,6 +74,11 @@ class ApiResource(CORSResource):
                 )
         else:
             api.clear_pending()
+
+    @property
+    def principal(self) -> Principal:
+        """The caller, from the JWT claims API Gateway verified (anonymous on public routes)."""
+        return principal_from_request_context(self.request.context)
 
     def body_as[M: BaseModel](self, model: type[M]) -> M:
         """Parse the JSON body into a pydantic model (422 on invalid input)."""
