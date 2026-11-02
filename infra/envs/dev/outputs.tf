@@ -12,3 +12,18 @@ output "event_bus_name" {
   description = "Domain event bus."
   value       = module.stack.event_bus_name
 }
+
+output "user_pool_id" {
+  description = "Cognito user pool id."
+  value       = module.stack.user_pool_id
+}
+
+output "web_client_id" {
+  description = "Cognito web app client id."
+  value       = module.stack.web_client_id
+}
+
+output "hosted_ui_domain" {
+  description = "Cognito Hosted UI domain."
+  value       = module.stack.hosted_ui_domain
+}

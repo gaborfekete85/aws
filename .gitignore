@@ -26,6 +26,7 @@ blob-report/
 *.tfplan
 crash.log
 .terraform.lock.hcl.bak
+infra/modules/**/.terraform.lock.hcl
 override.tf
 override.tf.json
 *_override.tf

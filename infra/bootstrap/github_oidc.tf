@@ -159,9 +159,22 @@ data "aws_iam_policy_document" "plan_guardrails" {
       "cognito-idp:AdminListGroupsForUser", "cognito-idp:AdminListUserAuthEvents",
       "cognito-idp:AdminListDevices", "cognito-idp:AdminGetDevice",
       "ses:GetTemplate", "ses:GetEmailTemplate",
-      "kms:Decrypt",
     ]
     resources = ["*"]
+  }
+  # SecureString parameters stay unreadable, except the Google IdP credentials:
+  # Cognito already returns those to ReadOnlyAccess via DescribeIdentityProvider,
+  # and the cognito module needs them at plan time.
+  statement {
+    sid       = "DenyDecryptExceptGoogleIdp"
+    effect    = "Deny"
+    actions   = ["kms:Decrypt"]
+    resources = ["*"]
+    condition {
+      test     = "StringNotLike"
+      variable = "kms:EncryptionContext:PARAMETER_ARN"
+      values   = ["arn:aws:ssm:${var.region}:${local.account_id}:parameter/${var.project}/*/google/*"]
+    }
   }
   statement {
     sid           = "DenyObjectReadsOutsideState"
@@ -169,6 +182,30 @@ data "aws_iam_policy_document" "plan_guardrails" {
     actions       = ["s3:GetObject", "s3:GetObjectVersion"]
     not_resources = ["${aws_s3_bucket.state.arn}/envs/*"]
   }
+}
+
+data "aws_iam_policy_document" "plan_google_idp" {
+  statement {
+    sid       = "DecryptGoogleIdpParameters"
+    actions   = ["kms:Decrypt"]
+    resources = ["*"]
+    condition {
+      test     = "StringLike"
+      variable = "kms:EncryptionContext:PARAMETER_ARN"
+      values   = ["arn:aws:ssm:${var.region}:${local.account_id}:parameter/${var.project}/*/google/*"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["ssm.${var.region}.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy" "plan_google_idp" {
+  name   = "google-idp-parameters"
+  role   = aws_iam_role.plan.id
+  policy = data.aws_iam_policy_document.plan_google_idp.json
 }
 
 resource "aws_iam_role_policy" "plan_guardrails" {

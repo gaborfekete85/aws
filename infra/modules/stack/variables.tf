@@ -51,3 +51,14 @@ variable "cors_allow_origins" {
   type        = list(string)
   default     = ["*"]
 }
+
+variable "web_urls" {
+  description = "Origins the web app is served from (OAuth callbacks are derived from these)."
+  type        = list(string)
+}
+
+variable "enable_google_login" {
+  description = "Create the Google identity provider."
+  type        = bool
+  default     = true
+}
