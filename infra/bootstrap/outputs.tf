@@ -12,3 +12,8 @@ output "deploy_role_arn" {
   description = "Role assumed by deploy workflows (set as AWS_DEPLOY_ROLE_ARN in GitHub)."
   value       = aws_iam_role.deploy.arn
 }
+
+output "workload_boundary_arn" {
+  description = "Permissions boundary every application role must carry."
+  value       = aws_iam_policy.workload_boundary.arn
+}

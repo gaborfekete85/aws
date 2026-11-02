@@ -5,8 +5,12 @@ Applied **once, by hand**, with local state. Everything else in `infra/` uses th
 ## What it creates
 
 - **State bucket** `localbini-tfstate-<account-id>`: versioning, SSE (AES256), all public access blocked, bucket-owner-enforced, TLS-only bucket policy, noncurrent versions expire after 90 days, `prevent_destroy`.
-- **`localbini-gha-plan` role**: trusted for `pull_request` and `main` of this repo; `ReadOnlyAccess` + read/write on `envs/*` state objects (needed for the lock file).
-- **`localbini-gha-deploy` role**: trusted only for `main` and the `dev` / `prod` GitHub Environments; service-scoped permissions, IAM limited to `localbini-*` roles/policies, explicit deny on tampering with the state bucket.
+- **`localbini-gha-plan` role**: trusted for `pull_request` and `main` of this repo. `ReadOnlyAccess`, read-only on `envs/*` state, write only on `envs/*.tflock`, and an explicit deny on data-plane reads (DynamoDB items, SQS messages, secret values, log events, non-state S3 objects).
+- **`localbini-gha-deploy` role**: trusted only for `main` and the `dev` / `prod` GitHub Environments, with `ref == refs/heads/main` required as well.
+  - Name-scoped services (Lambda, DynamoDB, SQS, EventBridge, Logs, SSM, Secrets Manager, S3) are limited to `localbini-*` resources.
+  - **Privilege-escalation guard**: it can create roles or grant them permissions only with the `localbini-workload-boundary` permissions boundary attached, can attach only project policies or the Lambda-managed execution policies, cannot touch the CI roles, state policies or the boundary itself, and cannot remove a boundary.
+  - Explicit deny on changing the state bucket's policy, versioning, encryption, public-access block or lifecycle, and on deleting state object versions.
+- **`localbini-workload-boundary`**: the ceiling for every application role. Every `aws_iam_role` in `infra/modules` sets `permissions_boundary` to it.
 - The GitHub OIDC provider is looked up (the account already has one). In a fresh account set `create_github_oidc_provider = true`.
 
 ## Locking
@@ -24,6 +28,8 @@ terraform init
 terraform apply
 terraform output                       # note the three outputs
 ```
+
+In GitHub → Settings → Environments create `dev` and `prod`, each with **Deployment branches: `main` only**; `prod` also gets a required reviewer.
 
 Then in GitHub → Settings → Secrets and variables → Actions → **Variables**:
 
