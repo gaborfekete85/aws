@@ -1,0 +1,1 @@
+"""Localbini booking service."""

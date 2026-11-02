@@ -16,12 +16,12 @@
   - Fundamental knowledge of cybersecurity, including the ability to conduct and understand automated penetration tests.
   - Familiarity with AWS cost and performance optimization.
 
-Must consider during design: 
-Requirements: 
+Must consider during design:
+Requirements:
  - Python REST API development
  - Terraform on AWS (infrastructure as code)
  - AWS serverless services (Lambda, S3, SES, SQS)
- - asyncio, aiohttp and AWS EventBridge 
+ - asyncio, aiohttp and AWS EventBridge
  - AWS DynamoDB and Elasticsearch/OpenSearch
  - AWS Cognito and Amplify
  - Domain-Driven Design

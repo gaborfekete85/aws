@@ -1,0 +1,1 @@
+"""Localbini notifications service."""

@@ -1,0 +1,73 @@
+[project]
+name = "localbini"
+version = "0.1.0"
+description = "Localbini: book places at local events"
+requires-python = ">=3.13"
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["services/*"]
+
+[tool.uv.sources]
+localbini-shared = { workspace = true }
+localbini-catalog = { workspace = true }
+localbini-booking = { workspace = true }
+localbini-payments = { workspace = true }
+localbini-notifications = { workspace = true }
+
+[dependency-groups]
+dev = [
+  "localbini-shared",
+  "localbini-catalog",
+  "localbini-booking",
+  "localbini-payments",
+  "localbini-notifications",
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=5.0",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "moto[events,dynamodb,sqs,ses,ssm,s3,cognitoidp,secretsmanager]>=5.0",
+  "aioresponses>=0.7.7",
+  "boto3-stubs[essential,events,cognito-idp,ses,ssm,secretsmanager]>=1.35",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --import-mode=importlib"
+testpaths = [
+  "services/shared/tests",
+  "services/catalog/tests",
+  "services/booking/tests",
+  "services/payments/tests",
+  "services/notifications/tests",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+  "integration: needs local Postgres/PostGIS or DynamoDB Local (docker compose up)",
+  "dev: runs against the deployed dev environment",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["web", "infra"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF", "ASYNC"]
+ignore = ["S101"]  # assert is fine in tests
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S105", "S106", "S311"]
+"tests/**" = ["S105", "S106", "S311"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "services/shared/src:services/catalog/src:services/booking/src:services/payments/src:services/notifications/src"
+exclude = ["tests/", "/tests/", "web/", "infra/"]
