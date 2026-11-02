@@ -137,7 +137,10 @@ resource "aws_iam_role_policy_attachment" "plan_state" {
 }
 
 # ReadOnlyAccess includes data-plane reads Terraform never needs; deny them so a
-# PR workflow cannot exfiltrate application data.
+# PR workflow cannot exfiltrate application data. lambda:GetFunction and
+# ssm:GetParameter stay allowed because `terraform plan` refresh needs them;
+# SecureString values stay unreadable because kms:Decrypt is denied, and secret
+# parameters are written with value_wo so they never reach state.
 data "aws_iam_policy_document" "plan_guardrails" {
   statement {
     sid    = "DenyDataPlaneReads"
@@ -149,8 +152,12 @@ data "aws_iam_policy_document" "plan_guardrails" {
       "secretsmanager:GetSecretValue",
       "rds:DownloadDBLogFilePortion",
       "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery",
-      "cognito-idp:AdminGetUser",
+      "logs:GetLogRecord", "logs:GetQueryResults", "logs:StartLiveTail",
+      "dynamodb:PartiQLSelect", "dynamodb:ExecuteStatement", "dynamodb:BatchExecuteStatement",
+      "cognito-idp:AdminGetUser", "cognito-idp:ListUsers", "cognito-idp:ListUsersInGroup",
+      "cognito-idp:AdminListGroupsForUser",
       "ses:GetTemplate",
+      "kms:Decrypt",
     ]
     resources = ["*"]
   }
@@ -167,31 +174,74 @@ resource "aws_iam_role_policy" "plan_guardrails" {
   policy = data.aws_iam_policy_document.plan_guardrails.json
 }
 
+locals {
+  app_prefixes = [for env in ["dev", "prod"] : "${local.name_prefix}-${env}"]
+  app_resource_arns = flatten([for p in local.app_prefixes : [
+    "arn:aws:dynamodb:${var.region}:${local.account_id}:table/${p}-*",
+    "arn:aws:events:${var.region}:${local.account_id}:event-bus/${p}",
+    "arn:aws:sqs:${var.region}:${local.account_id}:${p}-*",
+    "arn:aws:ssm:${var.region}:${local.account_id}:parameter/${var.project}/${trimprefix(p, "${local.name_prefix}-")}/*",
+    "arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${p}-*",
+    "arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:rds!*",
+    "arn:aws:s3:::${p}-*/*",
+    "arn:aws:lambda:${var.region}:${local.account_id}:function:${p}-*",
+  ]])
+}
+
 # --- workload permissions boundary ---------------------------------------------
 # Every role the deploy role creates must carry this boundary, so a compromised
 # deploy cannot mint a role more powerful than an application Lambda needs.
 data "aws_iam_policy_document" "workload_boundary" {
   statement {
-    sid = "WorkloadServices"
+    sid = "UnscopableWorkloadActions"
     actions = [
       "logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents",
       "xray:PutTraceSegments", "xray:PutTelemetryRecords",
       "ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface",
       "ec2:AssignPrivateIpAddresses", "ec2:UnassignPrivateIpAddresses", "ec2:DescribeSubnets", "ec2:DescribeVpcs",
-      "dynamodb:*",
-      "events:PutEvents",
-      "sqs:SendMessage", "sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:ChangeMessageVisibility",
       "ses:SendEmail", "ses:SendRawEmail", "ses:SendTemplatedEmail",
-      "ssm:GetParameter", "ssm:GetParameters",
-      "secretsmanager:GetSecretValue",
-      "kms:Decrypt",
-      "s3:GetObject", "s3:PutObject",
       "cognito-idp:ListUsers", "cognito-idp:AdminAddUserToGroup", "cognito-idp:AdminRemoveUserFromGroup",
       "cognito-idp:AdminListGroupsForUser", "cognito-idp:ListUsersInGroup", "cognito-idp:AdminGetUser",
-      "lambda:InvokeFunction",
       "amplify:*",
     ]
     resources = ["*"]
+  }
+
+  statement {
+    sid = "ProjectResources"
+    actions = [
+      "dynamodb:*",
+      "events:PutEvents",
+      "sqs:SendMessage", "sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:ChangeMessageVisibility",
+      "ssm:GetParameter", "ssm:GetParameters",
+      "secretsmanager:GetSecretValue",
+      "s3:GetObject", "s3:PutObject",
+      "lambda:InvokeFunction",
+    ]
+    resources = local.app_resource_arns
+  }
+
+  statement {
+    sid       = "KmsViaProjectServices"
+    actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values = [
+        "ssm.${var.region}.amazonaws.com",
+        "secretsmanager.${var.region}.amazonaws.com",
+        "sqs.${var.region}.amazonaws.com",
+        "s3.${var.region}.amazonaws.com",
+      ]
+    }
+  }
+
+  statement {
+    sid       = "NeverTheStateBucket"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
   }
 }
 
@@ -258,8 +308,11 @@ data "aws_iam_policy_document" "deploy" {
       "arn:aws:ssm:${var.region}:${local.account_id}:parameter/${var.project}/*",
       "arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${local.name_prefix}-*",
       "arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:rds!*",
-      "arn:aws:s3:::${local.name_prefix}-*",
-      "arn:aws:s3:::${local.name_prefix}-*/*",
+      # Env-prefixed buckets only, so the state bucket (localbini-tfstate-*) never matches.
+      "arn:aws:s3:::${local.name_prefix}-dev-*",
+      "arn:aws:s3:::${local.name_prefix}-dev-*/*",
+      "arn:aws:s3:::${local.name_prefix}-prod-*",
+      "arn:aws:s3:::${local.name_prefix}-prod-*/*",
     ]
   }
 
@@ -281,12 +334,32 @@ data "aws_iam_policy_document" "deploy" {
       "iam:GetRole", "iam:UpdateRole", "iam:TagRole", "iam:UntagRole", "iam:DeleteRole",
       "iam:ListRolePolicies", "iam:ListAttachedRolePolicies", "iam:ListInstanceProfilesForRole",
       "iam:GetRolePolicy", "iam:DeleteRolePolicy", "iam:DetachRolePolicy",
-      "iam:UpdateAssumeRolePolicy",
       "iam:CreatePolicy", "iam:DeletePolicy", "iam:GetPolicy", "iam:GetPolicyVersion",
       "iam:ListPolicyVersions", "iam:CreatePolicyVersion", "iam:DeletePolicyVersion", "iam:TagPolicy",
-      "iam:PassRole",
     ]
     resources = [local.project_roles, local.project_policies]
+  }
+
+  # Trust policies are set at CreateRole time only (UpdateAssumeRolePolicy is not
+  # granted), and roles may be passed only to the services that run workloads.
+  statement {
+    sid       = "PassProjectRolesToWorkloadServices"
+    actions   = ["iam:PassRole"]
+    resources = [local.project_roles]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values = [
+        "lambda.amazonaws.com",
+        "apigateway.amazonaws.com",
+        "amplify.amazonaws.com",
+        "scheduler.amazonaws.com",
+        "events.amazonaws.com",
+        "cognito-idp.amazonaws.com",
+        "rds.amazonaws.com",
+        "monitoring.rds.amazonaws.com",
+      ]
+    }
   }
 
   # Creating roles or granting them permissions requires the workload boundary.
@@ -343,9 +416,8 @@ data "aws_iam_policy_document" "deploy" {
     sid    = "ProtectStateBucket"
     effect = "Deny"
     actions = [
-      "s3:DeleteBucket", "s3:PutBucketPolicy", "s3:DeleteBucketPolicy", "s3:PutBucketVersioning",
-      "s3:PutLifecycleConfiguration", "s3:PutBucketPublicAccessBlock", "s3:PutBucketOwnershipControls",
-      "s3:PutEncryptionConfiguration", "s3:PutBucketAcl",
+      "s3:DeleteBucket*", "s3:PutBucket*", "s3:PutLifecycleConfiguration",
+      "s3:PutEncryptionConfiguration", "s3:PutReplicationConfiguration",
     ]
     resources = [aws_s3_bucket.state.arn]
   }
