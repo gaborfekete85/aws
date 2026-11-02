@@ -6,4 +6,5 @@ module "stack" {
   interface_endpoint_az_count = 2
   budget_usd                  = 120
   alert_emails                = var.alert_emails
+  lambda_packages_dir         = "${path.root}/../../../dist"
 }

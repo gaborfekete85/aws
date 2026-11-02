@@ -34,3 +34,20 @@ variable "alert_emails" {
   description = "Budget / alarm notification emails."
   type        = list(string)
 }
+
+variable "lambda_packages_dir" {
+  description = "Directory containing <service>.zip files from scripts/build_lambda.sh."
+  type        = string
+}
+
+variable "log_retention_days" {
+  description = "Log retention for Lambdas and API access logs."
+  type        = number
+  default     = 14
+}
+
+variable "cors_allow_origins" {
+  description = "Origins allowed to call the API."
+  type        = list(string)
+  default     = ["*"]
+}
