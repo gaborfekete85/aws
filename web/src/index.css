@@ -56,3 +56,25 @@ input, textarea, select { font: inherit; padding: 0.55rem 0.7rem; border: 1px so
 .table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 .table th, .table td { text-align: left; padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border); }
 .table th { color: var(--muted); font-weight: 600; font-size: 0.9rem; }
+
+.search { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+.search .grow { flex: 1 1 220px; }
+.search-actions { display: flex; gap: 0.5rem; }
+.event-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.event-card a { display: block; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; height: 100%; }
+.event-card a:hover { border-color: var(--accent); }
+.event-card-body { padding: 0.75rem 1rem 1rem; }
+.event-card h2 { font-size: 1.05rem; margin: 0 0 0.25rem; }
+.event-card p { margin: 0.2rem 0; }
+.cover, .cover-large { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--border); }
+.cover-large { border-radius: 12px; max-height: 360px; }
+.cover-placeholder { display: grid; place-items: center; font-size: 2.5rem; font-weight: 700; color: var(--muted); }
+.price { font-weight: 600; }
+.pager { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1.5rem; }
+.event-detail { display: grid; gap: 1rem; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1rem; margin: 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+.callout { border-left: 4px solid var(--accent); padding: 0.25rem 1rem; background: var(--surface); border-radius: 0 8px 8px 0; }
+.prewrap { white-space: pre-line; }
+.banner { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid currentColor; }

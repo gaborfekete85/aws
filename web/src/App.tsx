@@ -4,9 +4,10 @@ import { useAppDispatch } from './app/hooks'
 import { loadSession } from './auth/authSlice'
 import { NavBar } from './components/NavBar'
 import { AdminPage } from './features/admin/AdminPage'
+import { EventDetailPage } from './features/events/EventDetailPage'
+import { SearchPage } from './features/events/SearchPage'
 import { RequireRole } from './components/RequireRole'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
-import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { Placeholder } from './pages/Placeholder'
 import { RegisterPage } from './pages/RegisterPage'
@@ -22,7 +23,8 @@ export default function App() {
       <NavBar />
       <main>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<SearchPage />} />
+          <Route path="/events/:eventId" element={<EventDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
