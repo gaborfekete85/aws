@@ -1,42 +1,41 @@
-import { Amplify } from 'aws-amplify'
-import {
-  confirmSignUp,
-  fetchAuthSession,
-  signIn,
-  signInWithRedirect,
-  signOut,
-  signUp,
-} from 'aws-amplify/auth'
 import { config } from '../config'
 import { groupsFromClaim, type AuthAdapter, type AuthUser } from './types'
 
-let configured = false
+/**
+ * Amplify is loaded on demand (dynamic import) so the search page renders before
+ * the Cognito SDK has downloaded (#38: it is the largest dependency of the app).
+ */
+let auth: Promise<typeof import('aws-amplify/auth')> | null = null
 
-function configure() {
-  if (configured) return
-  Amplify.configure({
-    Auth: {
-      Cognito: {
-        userPoolId: config.cognito.userPoolId,
-        userPoolClientId: config.cognito.userPoolClientId,
-        loginWith: {
-          email: true,
-          oauth: {
-            domain: config.cognito.domain,
-            scopes: ['openid', 'email', 'profile'],
-            redirectSignIn: [`${config.webUrl}/auth/callback`],
-            redirectSignOut: [`${config.webUrl}/`],
-            responseType: 'code',
-            providers: ['Google'],
+function amplify(): Promise<typeof import('aws-amplify/auth')> {
+  auth ??= (async () => {
+    const { Amplify } = await import('aws-amplify')
+    Amplify.configure({
+      Auth: {
+        Cognito: {
+          userPoolId: config.cognito.userPoolId,
+          userPoolClientId: config.cognito.userPoolClientId,
+          loginWith: {
+            email: true,
+            oauth: {
+              domain: config.cognito.domain,
+              scopes: ['openid', 'email', 'profile'],
+              redirectSignIn: [`${config.webUrl}/auth/callback`],
+              redirectSignOut: [`${config.webUrl}/`],
+              responseType: 'code',
+              providers: ['Google'],
+            },
           },
         },
       },
-    },
-  })
-  configured = true
+    })
+    return import('aws-amplify/auth')
+  })()
+  return auth
 }
 
 async function userFromSession(): Promise<AuthUser | null> {
+  const { fetchAuthSession } = await amplify()
   const session = await fetchAuthSession()
   const payload = session.tokens?.idToken?.payload
   if (!payload?.sub) return null
@@ -50,7 +49,6 @@ async function userFromSession(): Promise<AuthUser | null> {
 
 export const amplifyAdapter: AuthAdapter = {
   async currentUser() {
-    configure()
     try {
       return await userFromSession()
     } catch {
@@ -58,12 +56,12 @@ export const amplifyAdapter: AuthAdapter = {
     }
   },
   async idToken() {
-    configure()
+    const { fetchAuthSession } = await amplify()
     const session = await fetchAuthSession()
     return session.tokens?.idToken?.toString() ?? null
   },
   async signIn(email, password) {
-    configure()
+    const { signIn } = await amplify()
     const result = await signIn({ username: email, password })
     if (result.nextStep.signInStep === 'CONFIRM_SIGN_UP') return { kind: 'needsConfirmation' }
     const user = await userFromSession()
@@ -71,19 +69,19 @@ export const amplifyAdapter: AuthAdapter = {
     return { kind: 'signedIn', user }
   },
   async signInWithGoogle() {
-    configure()
+    const { signInWithRedirect } = await amplify()
     await signInWithRedirect({ provider: 'Google' })
   },
   async signUp(email, password, name) {
-    configure()
+    const { signUp } = await amplify()
     await signUp({ username: email, password, options: { userAttributes: { email, name } } })
   },
   async confirmSignUp(email, code) {
-    configure()
+    const { confirmSignUp } = await amplify()
     await confirmSignUp({ username: email, confirmationCode: code })
   },
   async signOut() {
-    configure()
+    const { signOut } = await amplify()
     await signOut()
   },
 }

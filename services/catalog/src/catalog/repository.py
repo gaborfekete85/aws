@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import struct
 import uuid
 from collections.abc import Sequence
 
-from geoalchemy2.shape import from_shape, to_shape
-from shapely.geometry import Point
+from geoalchemy2.elements import WKBElement, WKTElement
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -16,12 +16,32 @@ from localbini_shared.errors import NotFoundError
 
 
 def _point_to_db(point: GeoPoint) -> object:
-    return from_shape(Point(point.lng, point.lat), srid=4326)
+    return WKTElement(f"POINT({point.lng!r} {point.lat!r})", srid=4326)
+
+
+_SRID_FLAG = 0x20000000
+
+
+def parse_ewkb_point(data: bytes) -> tuple[float, float]:
+    """(x, y) of a 2D (E)WKB Point.
+
+    Replaces shapely, which pulled numpy (~53 MB) into the Catalog Lambda just for this.
+    Layout: byte order (1) | type (uint32, SRID flag 0x20000000) | [srid] | x | y (doubles).
+    """
+    order = "<" if data[0] == 1 else ">"
+    (geom_type,) = struct.unpack_from(f"{order}I", data, 1)
+    if geom_type & 0xFF != 1:
+        raise ValueError(f"not a Point (WKB type {geom_type:#x})")
+    offset = 9 if geom_type & _SRID_FLAG else 5
+    x, y = struct.unpack_from(f"{order}dd", data, offset)
+    return x, y
 
 
 def _point_from_db(value: object) -> GeoPoint:
-    shape = to_shape(value)  # type: ignore[arg-type]
-    return GeoPoint(lat=shape.y, lng=shape.x)
+    raw = value.data if isinstance(value, WKBElement) else value
+    data = bytes.fromhex(raw) if isinstance(raw, str) else bytes(raw)  # type: ignore[arg-type]
+    lng, lat = parse_ewkb_point(data)
+    return GeoPoint(lat=lat, lng=lng)
 
 
 def location_from_row(row: LocationRow) -> Location:

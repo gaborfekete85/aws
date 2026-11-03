@@ -261,6 +261,12 @@ data "aws_iam_policy_document" "workload_boundary" {
   }
 
   statement {
+    sid       = "StartStopProjectDatabases" # dev office-hours schedule (#38)
+    actions   = ["rds:StartDBInstance", "rds:StopDBInstance"]
+    resources = [for p in local.app_prefixes : "arn:aws:rds:${var.region}:${local.account_id}:db:${p}-*"]
+  }
+
+  statement {
     sid       = "KmsViaProjectServices"
     actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
     resources = ["*"]

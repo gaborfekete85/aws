@@ -65,3 +65,21 @@ variable "db_name" {
   type        = string
   default     = "catalog"
 }
+
+variable "log_retention_days" {
+  description = "Retention of the exported PostgreSQL logs."
+  type        = number
+  default     = 14
+}
+
+variable "office_hours_only" {
+  description = "Dev cost saver: stop the instance outside 07:00-20:00 Europe/Zurich on weekdays."
+  type        = bool
+  default     = false
+}
+
+variable "permissions_boundary_arn" {
+  description = "Boundary for the scheduler role."
+  type        = string
+  default     = null
+}

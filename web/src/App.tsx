@@ -1,20 +1,22 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { useAppDispatch } from './app/hooks'
 import { loadSession } from './auth/authSlice'
 import { NavBar } from './components/NavBar'
-import { AdminPage } from './features/admin/AdminPage'
-import { CheckoutReturnPage } from './features/bookings/CheckoutReturnPage'
-import { MyBookingsPage } from './features/bookings/MyBookingsPage'
 import { EventDetailPage } from './features/events/EventDetailPage'
 import { SearchPage } from './features/events/SearchPage'
-import { DashboardPage } from './features/organizer/DashboardPage'
-import { EventFormPage } from './features/organizer/EventFormPage'
 import { RequireRole } from './components/RequireRole'
-import { AuthCallbackPage } from './pages/AuthCallbackPage'
-import { LoginPage } from './pages/LoginPage'
 import { Placeholder } from './pages/Placeholder'
-import { RegisterPage } from './pages/RegisterPage'
+
+// Route-level code splitting (#38): most Visitors only ever load search + detail.
+const AdminPage = lazy(() => import('./features/admin/AdminPage').then((m) => ({ default: m.AdminPage })))
+const CheckoutReturnPage = lazy(() => import('./features/bookings/CheckoutReturnPage').then((m) => ({ default: m.CheckoutReturnPage })))
+const MyBookingsPage = lazy(() => import('./features/bookings/MyBookingsPage').then((m) => ({ default: m.MyBookingsPage })))
+const DashboardPage = lazy(() => import('./features/organizer/DashboardPage').then((m) => ({ default: m.DashboardPage })))
+const EventFormPage = lazy(() => import('./features/organizer/EventFormPage').then((m) => ({ default: m.EventFormPage })))
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })))
+const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
 
 export default function App() {
   const dispatch = useAppDispatch()
@@ -26,6 +28,7 @@ export default function App() {
     <>
       <NavBar />
       <main>
+        <Suspense fallback={<p className="muted">Loading…</p>}>
         <Routes>
           <Route path="/" element={<SearchPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
@@ -90,6 +93,7 @@ export default function App() {
           />
           <Route path="*" element={<Placeholder title="Page not found" />} />
         </Routes>
+        </Suspense>
       </main>
     </>
   )

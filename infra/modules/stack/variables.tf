@@ -80,3 +80,15 @@ variable "enable_test_harness" {
   type        = bool
   default     = false
 }
+
+variable "interface_endpoints" {
+  description = "Interface VPC endpoints for in-VPC Lambdas (each ~USD 8.8/month per AZ in eu-central-1)."
+  type        = list(string)
+  default     = ["secretsmanager", "events"]
+}
+
+variable "rds_office_hours_only" {
+  description = "Stop the Catalog DB outside office hours (dev cost saver)."
+  type        = bool
+  default     = false
+}

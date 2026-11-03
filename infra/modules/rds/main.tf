@@ -34,6 +34,12 @@ resource "aws_db_parameter_group" "this" {
   }
 }
 
+# Created up front so the exported PostgreSQL logs get a retention (RDS would create it without one).
+resource "aws_cloudwatch_log_group" "postgresql" {
+  name              = "/aws/rds/instance/${var.name}-catalog/postgresql"
+  retention_in_days = var.log_retention_days
+}
+
 resource "aws_db_instance" "this" {
   identifier     = "${var.name}-catalog"
   engine         = "postgres"
@@ -68,6 +74,8 @@ resource "aws_db_instance" "this" {
   final_snapshot_identifier = var.deletion_protection ? "${var.name}-catalog-final" : null
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
+
+  depends_on = [aws_cloudwatch_log_group.postgresql]
 }
 
 output "address" {
@@ -93,4 +101,9 @@ output "secret_arn" {
 output "instance_id" {
   description = "DB instance identifier."
   value       = aws_db_instance.this.identifier
+}
+
+output "instance_arn" {
+  description = "DB instance ARN."
+  value       = aws_db_instance.this.arn
 }

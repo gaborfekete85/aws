@@ -8,6 +8,7 @@ module "network" {
   cidr_block                  = var.vpc_cidr
   nat                         = var.nat
   interface_endpoint_az_count = var.interface_endpoint_az_count
+  interface_endpoints         = var.interface_endpoints
 }
 
 module "budget" {

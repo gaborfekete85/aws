@@ -132,3 +132,33 @@ class TestEdit:
         past = NOW - timedelta(days=1)
         with pytest.raises(ValidationError, match="past"):
             event.edit(now=NOW, starts_at=past, ends_at=past + timedelta(hours=1))
+
+
+class TestEwkbPoint:
+    def test_little_endian_with_srid(self) -> None:
+        import struct
+
+        from catalog.repository import parse_ewkb_point
+
+        ewkb = struct.pack("<BII", 1, 0x20000001, 4326) + struct.pack("<dd", 8.5354, 47.3601)
+        assert parse_ewkb_point(ewkb) == (8.5354, 47.3601)
+
+    def test_big_endian_plain_wkb(self) -> None:
+        import struct
+
+        from catalog.repository import parse_ewkb_point
+
+        assert parse_ewkb_point(struct.pack(">BI", 0, 1) + struct.pack(">dd", -1.5, 2.25)) == (
+            -1.5,
+            2.25,
+        )
+
+    def test_rejects_non_points(self) -> None:
+        import struct
+
+        import pytest
+
+        from catalog.repository import parse_ewkb_point
+
+        with pytest.raises(ValueError, match="not a Point"):
+            parse_ewkb_point(struct.pack("<BI", 1, 2) + b"\\x00" * 16)

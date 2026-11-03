@@ -6,6 +6,9 @@ module "catalog_db" {
   client_security_group_ids = [module.network.lambda_security_group_id]
   multi_az                  = var.env == "prod"
   deletion_protection       = var.env == "prod"
+  log_retention_days        = var.log_retention_days
+  office_hours_only         = var.rds_office_hours_only
+  permissions_boundary_arn  = local.boundary_arn
 }
 
 locals {
@@ -36,7 +39,7 @@ module "catalog_migrate" {
   package_path             = "${var.lambda_packages_dir}/catalog.zip"
   handler                  = "catalog.migrate.handle"
   timeout                  = 300
-  memory_size              = 256
+  memory_size              = 512 # runs a few times a month; faster migrations
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = merge(local.common_env, local.catalog_db_env)
@@ -69,8 +72,8 @@ module "catalog_api" {
   description              = "Catalog: Organizer Event management and public Event search"
   package_path             = "${var.lambda_packages_dir}/catalog.zip"
   handler                  = "catalog.api.handle"
-  timeout                  = 15 # includes geocoding with retries
-  memory_size              = 512
+  timeout                  = 15   # includes geocoding with retries
+  memory_size              = 1024 # import-heavy cold start (SQLAlchemy, geoalchemy2, psycopg): CPU scales with memory; see docs/cost.md
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment = merge(local.common_env, local.catalog_db_env, {
