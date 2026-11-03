@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<body style="font-family: system-ui, sans-serif; color: #1f2937; max-width: 560px; margin: 0 auto;">
+  <h1 style="font-size: 20px;">You're going to {{ event.title }}</h1>
+  <p>Your Booking is confirmed. See you there!</p>
+  <table style="border-collapse: collapse;">
+    <tr><td style="padding: 4px 12px 4px 0;"><strong>When</strong></td><td>{{ event.starts_at | when }}</td></tr>
+    <tr><td style="padding: 4px 12px 4px 0;"><strong>Where</strong></td><td>{{ event.location.name }}{% if event.location.address %}, {{ event.location.address }}{% endif %}{% if event.location.city %}, {{ event.location.city }}{% endif %}</td></tr>
+    <tr><td style="padding: 4px 12px 4px 0;"><strong>Places</strong></td><td>{{ places }}</td></tr>
+    <tr><td style="padding: 4px 12px 4px 0;"><strong>Paid</strong></td><td>{{ amount_cents | money(currency) }}</td></tr>
+  </table>
+  {% if event.important_information %}
+  <h2 style="font-size: 16px; margin-top: 24px;">Important information</h2>
+  <p style="white-space: pre-line;">{{ event.important_information }}</p>
+  {% endif %}
+  <p style="color: #6b7280; font-size: 12px; margin-top: 32px;">Booking {{ booking_id }}</p>
+</body>
+</html>

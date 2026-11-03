@@ -1,0 +1,1 @@
+Your Booking for {{ event.title }} is confirmed

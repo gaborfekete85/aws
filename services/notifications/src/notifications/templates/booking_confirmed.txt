@@ -1,0 +1,16 @@
+You're going to {{ event.title }}
+
+Your Booking is confirmed. See you there!
+
+When:   {{ event.starts_at | when }}
+Where:  {{ event.location.name }}{% if event.location.address %}, {{ event.location.address }}{% endif %}{% if event.location.city %}, {{ event.location.city }}{% endif %}
+
+Places: {{ places }}
+Paid:   {{ amount_cents | money(currency) }}
+{% if event.important_information %}
+
+Important information
+{{ event.important_information }}
+{% endif %}
+
+Booking {{ booking_id }}
