@@ -6,7 +6,9 @@
 | Hold        | EVENT#<id>   | HOLD#<booking> |                       |                    |
 | Booking     | BOOKING#<id> | BOOKING        | ATTENDEE#<sub>/<ts>   | EVENT#<id>/<ts>    |
 
-Holds carry a TTL attribute (``expires_at``, epoch seconds). Keep
+Holds are also in the sparse GSI3 (``HOLD`` / logical expiry) that the expiry sweep
+queries, and carry a TTL attribute (``expires_at`` = expiry + 24 h) purely for
+garbage collection. Keep
 ``table_definition()`` in sync with ``infra/modules/stack/booking.tf``.
 """
 
@@ -22,7 +24,10 @@ PK = "pk"
 SK = "sk"
 GSI1 = "gsi1"
 GSI2 = "gsi2"
+GSI3 = "gsi3"  # sparse: only Hold items, sorted by logical expiry (for the sweep)
 TTL_ATTRIBUTE = "expires_at"
+HOLDS_GSI_PK = "HOLD"
+TTL_GRACE_SECONDS = 24 * 3600  # TTL only garbage-collects; the sweep releases Places
 
 
 def event_pk(event_id: str) -> str:
@@ -62,7 +67,16 @@ def table_definition(name: str) -> dict[str, Any]:
         "BillingMode": "PAY_PER_REQUEST",
         "AttributeDefinitions": [
             {"AttributeName": a, "AttributeType": "S"}
-            for a in (PK, SK, f"{GSI1}pk", f"{GSI1}sk", f"{GSI2}pk", f"{GSI2}sk")
+            for a in (
+                PK,
+                SK,
+                f"{GSI1}pk",
+                f"{GSI1}sk",
+                f"{GSI2}pk",
+                f"{GSI2}sk",
+                f"{GSI3}pk",
+                f"{GSI3}sk",
+            )
         ],
         "KeySchema": [
             {"AttributeName": PK, "KeyType": "HASH"},
@@ -77,7 +91,7 @@ def table_definition(name: str) -> dict[str, Any]:
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             }
-            for index in (GSI1, GSI2)
+            for index in (GSI1, GSI2, GSI3)
         ],
         "StreamSpecification": {"StreamEnabled": True, "StreamViewType": "NEW_AND_OLD_IMAGES"},
     }

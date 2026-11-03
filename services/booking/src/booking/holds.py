@@ -16,7 +16,17 @@ from typing import Any
 from botocore.exceptions import ClientError
 from localbini_shared.errors import ConflictError
 
-from booking.table import PLACES_SK, client, event_pk, hold_sk, table_name
+from booking.table import (
+    BOOKING_SK,
+    HOLDS_GSI_PK,
+    PLACES_SK,
+    TTL_GRACE_SECONDS,
+    booking_pk,
+    client,
+    event_pk,
+    hold_sk,
+    table_name,
+)
 
 
 class NotEnoughPlaces(ConflictError):
@@ -42,8 +52,12 @@ def hold_item(req: HoldRequest) -> dict[str, Any]:
         "sk": {"S": hold_sk(req.booking_id)},
         "booking_id": {"S": req.booking_id},
         "attendee_id": {"S": req.attendee_id},
+        "event_id": {"S": req.event_id},
         "places": {"N": str(req.places)},
-        "expires_at": {"N": str(int(req.expires_at.timestamp()))},
+        "hold_expires_at": {"S": req.expires_at.isoformat()},
+        "gsi3pk": {"S": HOLDS_GSI_PK},
+        "gsi3sk": {"S": f"{req.expires_at.isoformat()}#{req.booking_id}"},
+        "expires_at": {"N": str(int(req.expires_at.timestamp()) + TTL_GRACE_SECONDS)},
     }
 
 
@@ -146,3 +160,118 @@ def release_places(event_id: str, booking_id: str, places: int) -> bool:
             return False
         raise
     return True
+
+
+class HoldGone(ConflictError):
+    """The Hold no longer exists (expired, released or already converted)."""
+
+
+def _hold_key(event_id: str, booking_id: str) -> dict[str, Any]:
+    return {"pk": {"S": event_pk(event_id)}, "sk": {"S": hold_sk(booking_id)}}
+
+
+def _booking_key(booking_id: str) -> dict[str, Any]:
+    return {"pk": {"S": booking_pk(booking_id)}, "sk": {"S": BOOKING_SK}}
+
+
+def expire_hold(event_id: str, booking_id: str, places: int, now_iso: str) -> bool:
+    """Release an expired Hold exactly once; the Booking moves pending -> expired.
+
+    One transaction: delete the Hold (only if it still exists), give its Places
+    back, and mark the Booking expired (only if still pending). A concurrent
+    payment converts the Hold first, so the two can never both win.
+    """
+    try:
+        client().transact_write_items(
+            TransactItems=[
+                {
+                    "Delete": {
+                        "TableName": table_name(),
+                        "Key": _hold_key(event_id, booking_id),
+                        "ConditionExpression": "attribute_exists(pk)",
+                    }
+                },
+                {
+                    "Update": {
+                        "TableName": table_name(),
+                        "Key": {"pk": {"S": event_pk(event_id)}, "sk": {"S": PLACES_SK}},
+                        "UpdateExpression": "SET places_left = places_left + :n",
+                        "ExpressionAttributeValues": {":n": {"N": str(places)}},
+                    }
+                },
+                {
+                    "Update": {
+                        "TableName": table_name(),
+                        "Key": _booking_key(booking_id),
+                        "UpdateExpression": "SET #s = :expired, expired_at = :now",
+                        "ConditionExpression": "#s = :pending",
+                        "ExpressionAttributeNames": {"#s": "status"},
+                        "ExpressionAttributeValues": {
+                            ":expired": {"S": "expired"},
+                            ":pending": {"S": "pending"},
+                            ":now": {"S": now_iso},
+                        },
+                    }
+                },
+            ]
+        )
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "TransactionCanceledException":
+            return False
+        raise
+    return True
+
+
+def convert_hold(event_id: str, booking_id: str, now_iso: str) -> None:
+    """Payment arrived in time: the Hold becomes a confirmed Booking (Places stay taken).
+
+    Raises HoldGone when the Hold already expired: a late payment.
+    """
+    try:
+        client().transact_write_items(
+            TransactItems=[
+                {
+                    "Delete": {
+                        "TableName": table_name(),
+                        "Key": _hold_key(event_id, booking_id),
+                        "ConditionExpression": "attribute_exists(pk)",
+                    }
+                },
+                {
+                    "Update": {
+                        "TableName": table_name(),
+                        "Key": _booking_key(booking_id),
+                        "UpdateExpression": "SET #s = :confirmed, confirmed_at = :now",
+                        "ConditionExpression": "#s = :pending",
+                        "ExpressionAttributeNames": {"#s": "status"},
+                        "ExpressionAttributeValues": {
+                            ":confirmed": {"S": "confirmed"},
+                            ":pending": {"S": "pending"},
+                            ":now": {"S": now_iso},
+                        },
+                    }
+                },
+            ]
+        )
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "TransactionCanceledException":
+            raise HoldGone("The Hold has already expired") from error
+        raise
+
+
+def due_holds(now_iso: str, limit: int = 500) -> list[dict[str, Any]]:
+    """Holds whose logical expiry is before ``now`` (sparse GSI3, oldest first)."""
+    kwargs: dict[str, Any] = {
+        "TableName": table_name(),
+        "IndexName": "gsi3",
+        "KeyConditionExpression": "gsi3pk = :h AND gsi3sk < :now",
+        "ExpressionAttributeValues": {":h": {"S": HOLDS_GSI_PK}, ":now": {"S": now_iso}},
+    }
+    holds: list[dict[str, Any]] = []
+    while len(holds) < limit:
+        page = client().query(**kwargs)
+        holds.extend(page["Items"])
+        if "LastEvaluatedKey" not in page:
+            break
+        kwargs["ExclusiveStartKey"] = page["LastEvaluatedKey"]
+    return holds[:limit]

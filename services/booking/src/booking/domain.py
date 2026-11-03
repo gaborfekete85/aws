@@ -41,6 +41,7 @@ class Booking:
     hold_expires_at: datetime | None = None
     confirmed_at: datetime | None = None
     cancelled_at: datetime | None = None
+    expired_at: datetime | None = None
     event_title: str = ""
 
     def __post_init__(self) -> None:
@@ -110,7 +111,7 @@ class Booking:
         }
         if self.attendee_email:
             item["attendee_email"] = {"S": self.attendee_email}
-        for name in ("hold_expires_at", "confirmed_at", "cancelled_at"):
+        for name in ("hold_expires_at", "confirmed_at", "cancelled_at", "expired_at"):
             value = getattr(self, name)
             if value is not None:
                 item[name] = {"S": value.isoformat()}
@@ -136,6 +137,7 @@ class Booking:
             hold_expires_at=ts("hold_expires_at"),
             confirmed_at=ts("confirmed_at"),
             cancelled_at=ts("cancelled_at"),
+            expired_at=ts("expired_at"),
         )
         return booking
 

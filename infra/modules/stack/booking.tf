@@ -6,7 +6,7 @@ resource "aws_dynamodb_table" "bookings" {
   range_key    = "sk"
 
   dynamic "attribute" {
-    for_each = toset(["pk", "sk", "gsi1pk", "gsi1sk", "gsi2pk", "gsi2sk"])
+    for_each = toset(["pk", "sk", "gsi1pk", "gsi1sk", "gsi2pk", "gsi2sk", "gsi3pk", "gsi3sk"])
     content {
       name = attribute.value
       type = "S"
@@ -27,6 +27,14 @@ resource "aws_dynamodb_table" "bookings" {
     projection_type = "ALL"
   }
 
+  global_secondary_index {
+    name            = "gsi3" # sparse: Holds by logical expiry (ADR-0004 sweep)
+    hash_key        = "gsi3pk"
+    range_key       = "gsi3sk"
+    projection_type = "ALL"
+  }
+
+  # Garbage collection only (expiry + 24 h); the sweep releases Places.
   ttl {
     attribute_name = "expires_at"
     enabled        = true
@@ -113,4 +121,21 @@ module "booking_api" {
     { route_key = "GET /bookings/{booking_id}" },
     { route_key = "GET /events/{event_id}/availability", public = true },
   ]
+}
+
+# ADR-0004: release expired Holds every minute.
+module "booking_expiry" {
+  source                   = "../lambda-service"
+  name                     = "${local.name}-booking-expiry"
+  description              = "Booking: release expired Holds (scheduled sweep)"
+  package_path             = "${var.lambda_packages_dir}/booking.zip"
+  handler                  = "booking.expiry.handle"
+  memory_size              = 256
+  timeout                  = 50
+  reserved_concurrency     = 1 # one sweep at a time (correct either way, cheaper this way)
+  permissions_boundary_arn = local.boundary_arn
+  log_retention_days       = var.log_retention_days
+  environment              = local.booking_env
+  policy_json              = data.aws_iam_policy_document.booking_table.json
+  schedule_expression      = "rate(1 minute)"
 }
