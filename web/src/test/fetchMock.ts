@@ -24,7 +24,15 @@ export function mockFetch(routes: Record<string, Handler>) {
         return m === request.method && re.test(url.pathname)
       })?.[1]
     if (!handler) return new Response(JSON.stringify({ message: 'not mocked' }), { status: 404 })
-    const result = await handler({ method: request.method, url, body: text ? JSON.parse(text) : undefined })
+    let body: unknown = undefined
+    if (text) {
+      try {
+        body = JSON.parse(text)
+      } catch {
+        body = text // binary / non-JSON uploads (e.g. the S3 PUT)
+      }
+    }
+    const result = await handler({ method: request.method, url, body })
     if (result instanceof Response) return result
     return new Response(JSON.stringify(result), {
       status: 200,

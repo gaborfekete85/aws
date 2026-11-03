@@ -26,6 +26,10 @@ export interface EventDto {
   is_free: boolean
   status: EventStatus
   location: EventLocation
+  created_at?: string
+  updated_at?: string
+  published_at?: string | null
+  cancelled_at?: string | null
   distance_km?: number | null
 }
 

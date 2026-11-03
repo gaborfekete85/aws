@@ -78,3 +78,18 @@ input, textarea, select { font: inherit; padding: 0.55rem 0.7rem; border: 1px so
 .callout { border-left: 4px solid var(--accent); padding: 0.25rem 1rem; background: var(--surface); border-radius: 0 8px 8px 0; }
 .prewrap { white-space: pre-line; }
 .banner { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid currentColor; }
+
+.row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.tabs { display: flex; gap: 0.5rem; margin: 0.5rem 0 1rem; flex-wrap: wrap; }
+.badge { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); vertical-align: middle; }
+.badge-published { color: var(--accent); border-color: var(--accent); }
+.badge-cancelled { color: var(--error); border-color: var(--error); }
+.actions { text-align: right; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.9rem; }
+.inline { display: flex; gap: 0.5rem; }
+.inline input { flex: 1; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.9rem; min-width: 0; }
+.stack { display: grid; gap: 1rem; }
+.dialog { max-width: 440px; border: 1px solid var(--border); color: var(--text); }
+.dialog::backdrop { background: rgb(0 0 0 / 0.4); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }

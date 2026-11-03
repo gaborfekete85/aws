@@ -6,6 +6,8 @@ import { NavBar } from './components/NavBar'
 import { AdminPage } from './features/admin/AdminPage'
 import { EventDetailPage } from './features/events/EventDetailPage'
 import { SearchPage } from './features/events/SearchPage'
+import { DashboardPage } from './features/organizer/DashboardPage'
+import { EventFormPage } from './features/organizer/EventFormPage'
 import { RequireRole } from './components/RequireRole'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { LoginPage } from './pages/LoginPage'
@@ -37,10 +39,26 @@ export default function App() {
             }
           />
           <Route
-            path="/organizer/*"
+            path="/organizer"
             element={
               <RequireRole role="organizer">
-                <Placeholder title="Organizer dashboard" />
+                <DashboardPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/organizer/events/new"
+            element={
+              <RequireRole role="organizer">
+                <EventFormPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/organizer/events/:eventId"
+            element={
+              <RequireRole role="organizer">
+                <EventFormPage />
               </RequireRole>
             }
           />
