@@ -1,0 +1,22 @@
+{
+  "id": "evt_test_pi_created",
+  "object": "event",
+  "api_version": "2025-09-30.clover",
+  "created": 1762171200,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "payment_intent.created",
+  "data": {
+    "object": {
+      "id": "pi_test_3Q1",
+      "object": "payment_intent",
+      "metadata": {
+        "booking_id": "BOOKING_ID"
+      }
+    }
+  }
+}

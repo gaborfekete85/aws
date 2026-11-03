@@ -1,0 +1,37 @@
+{
+  "id": "evt_test_async_failed",
+  "object": "event",
+  "api_version": "2025-09-30.clover",
+  "created": 1762171200,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "checkout.session.async_payment_failed",
+  "data": {
+    "object": {
+      "id": "cs_test_a1B2c3",
+      "object": "checkout.session",
+      "amount_subtotal": 5000,
+      "amount_total": 5000,
+      "client_reference_id": "BOOKING_ID",
+      "currency": "chf",
+      "customer_details": {
+        "email": "ada@example.com"
+      },
+      "expires_at": 1762173000,
+      "livemode": false,
+      "metadata": {
+        "booking_id": "BOOKING_ID",
+        "event_id": "EVENT_ID"
+      },
+      "mode": "payment",
+      "payment_intent": "pi_test_3Q1",
+      "payment_status": "unpaid",
+      "status": "complete",
+      "success_url": "http://localhost:5173/checkout/success?booking_id=BOOKING_ID"
+    }
+  }
+}

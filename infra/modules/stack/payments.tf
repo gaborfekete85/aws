@@ -130,5 +130,7 @@ module "payments_api" {
   api                      = local.api
   routes = [
     { route_key = "GET /bookings/{booking_id}/checkout" },
+    # Stripe calls this; authenticity comes from the Stripe signature, not a JWT.
+    { route_key = "POST /payments/stripe/webhook", public = true },
   ]
 }

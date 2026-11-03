@@ -116,3 +116,21 @@ def find(booking_id: str) -> CheckoutRecord | None:
         return get(booking_id)
     except NotFoundError:
         return None
+
+
+def mark(booking_id: str, status: str) -> bool:
+    """Set the Checkout status only if the record exists; False otherwise."""
+    try:
+        client().update_item(
+            TableName=table_name(),
+            Key=_key(booking_id),
+            UpdateExpression="SET #s = :s",
+            ConditionExpression="attribute_exists(pk)",
+            ExpressionAttributeNames={"#s": "status"},
+            ExpressionAttributeValues={":s": {"S": status}},
+        )
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            return False
+        raise
+    return True
