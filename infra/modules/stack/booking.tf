@@ -100,6 +100,10 @@ module "booking_consumer" {
       source        = ["localbini.catalog"]
       "detail-type" = ["EventPublished", "EventUpdated", "EventCancelled"]
     })
+    payments = jsonencode({
+      source        = ["localbini.payments"]
+      "detail-type" = ["PaymentSucceeded", "PaymentFailed"]
+    })
   }
 }
 

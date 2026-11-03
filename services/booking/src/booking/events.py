@@ -13,6 +13,7 @@ BOOKING_REQUESTED = "BookingRequested"
 BOOKING_CONFIRMED = "BookingConfirmed"
 BOOKING_CANCELLED = "BookingCancelled"
 HOLD_EXPIRED = "HoldExpired"
+EVENT_BOOKINGS_CANCELLED = "EventBookingsCancelled"
 
 
 def _base(booking: Booking) -> dict[str, Any]:
@@ -48,3 +49,14 @@ def booking_cancelled(booking: Booking, reason: str) -> DomainEvent:
 
 def hold_expired(booking: Booking) -> DomainEvent:
     return new_event(HOLD_EXPIRED, _base(booking), service=SERVICE)
+
+
+def event_bookings_cancelled(
+    event: dict[str, Any], attendees: list[dict[str, Any]], *, part: int, parts: int
+) -> DomainEvent:
+    """Affected Attendees of a cancelled Event, for Notifications (ADR-0005)."""
+    return new_event(
+        EVENT_BOOKINGS_CANCELLED,
+        {"event": event, "attendees": attendees, "part": part, "parts": parts},
+        service=SERVICE,
+    )
