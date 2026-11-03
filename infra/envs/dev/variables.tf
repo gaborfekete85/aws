@@ -41,3 +41,13 @@ variable "external_db_region" {
   type        = string
   default     = "eu-north-1"
 }
+
+variable "enable_google_login" {
+  description = <<-EOT
+    Create the Google identity provider in Cognito. Off until the Google OAuth client
+    id/secret are in SSM (/meeton/dev/google/*, see infra/modules/cognito/README.md);
+    then set TF_VAR_enable_google_login=true (or a repo variable) and apply again.
+  EOT
+  type        = bool
+  default     = false
+}

@@ -21,6 +21,7 @@ module "stack" {
   alert_emails        = var.alert_emails
   sender_email        = var.sender_email
   web_urls            = ["http://localhost:5173"]
+  enable_google_login = var.enable_google_login
   lambda_packages_dir = "${path.root}/../../../dist"
 }
 
