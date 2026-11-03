@@ -25,6 +25,10 @@ resource "aws_amplify_app" "web" {
             value: DENY
           - key: Referrer-Policy
             value: strict-origin-when-cross-origin
+          - key: Permissions-Policy
+            value: camera=(), microphone=(), geolocation=(self)
+          - key: Content-Security-Policy
+            value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.cloudfront.net; connect-src 'self' https://*.execute-api.${data.aws_region.current.region}.amazonaws.com https://cognito-idp.${data.aws_region.current.region}.amazonaws.com https://*.amazoncognito.com https://*.s3.${data.aws_region.current.region}.amazonaws.com https://*.s3.amazonaws.com https://nominatim.openstreetmap.org; form-action 'self' https://*.amazoncognito.com https://checkout.stripe.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
   YAML
 }
 

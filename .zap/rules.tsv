@@ -1,0 +1,2 @@
+10055	WARN	(CSP: style-src 'unsafe-inline' is intentional, see docs/security/zap-triage.md)
+10098	IGNORE	(Cross-Domain Misconfiguration: the API sends CORS only for the known web origins)

@@ -26,6 +26,13 @@ os.environ.setdefault("AWS_LAMBDA_FUNCTION_NAME", os.environ.get("SERVICE_NAME",
 
 ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
+# Sent on every API response: JSON must never be sniffed or cached by shared caches.
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "Cache-Control": "no-store",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+}
+
 
 def normalize_http_api_event(event: dict[str, Any]) -> dict[str, Any]:
     """Make an HTTP API (payload 1.0) event look like what lbz expects.
@@ -61,6 +68,7 @@ class ApiResource(CORSResource):
     def __call__(self) -> Response:
         response = super().__call__()
         response.headers.update(self.resp_headers())
+        response.headers.update(SECURITY_HEADERS)
         return response
 
     def post_request_hook(self) -> None:

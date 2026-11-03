@@ -1,0 +1,84 @@
+name: Pen test (OWASP ZAP)
+
+on:
+  schedule:
+    - cron: "17 3 * * 1" # Mondays 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # read-only plan role, to look up the dev URLs
+  issues: write # ZAP actions may open/update a findings issue
+
+concurrency:
+  group: zap-dev
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: ZAP baseline (web) + API scan (OpenAPI) against dev
+    if: vars.AWS_PLAN_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: eu-central-1
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.15"
+          terraform_wrapper: false
+      - name: Resolve dev URLs
+        id: urls
+        working-directory: infra/envs/dev
+        env:
+          TF_VAR_alert_emails: ${{ vars.ALERT_EMAILS }}
+          TF_VAR_sender_email: ${{ vars.SENDER_EMAIL }}
+        run: |
+          terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" >/dev/null
+          echo "web=$(terraform output -raw web_url)" >> "$GITHUB_OUTPUT"
+          echo "api=$(terraform output -raw api_endpoint)" >> "$GITHUB_OUTPUT"
+
+      - name: Point the OpenAPI spec at dev
+        run: |
+          sed -i "s#https://{apiId}.execute-api.eu-central-1.amazonaws.com#${{ steps.urls.outputs.api }}#" docs/openapi.yaml
+
+      - name: ZAP baseline scan (web app, passive)
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ steps.urls.outputs.web }}
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-a -j"
+          artifact_name: zap-baseline
+          allow_issue_writing: false
+          fail_action: false
+
+      - name: Keep baseline report
+        run: mv report_json.json zap-baseline.json && mv report_html.html zap-baseline.html
+
+      - name: ZAP API scan (OpenAPI, active)
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: docs/openapi.yaml
+          format: openapi
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-a"
+          artifact_name: zap-api
+          allow_issue_writing: false
+          fail_action: false
+
+      - name: Keep API report
+        run: mv report_json.json zap-api.json && mv report_html.html zap-api.html
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-reports-${{ github.run_id }}
+          path: zap-*.*
+          retention-days: 30
+
+      - name: Fail on untriaged High-risk findings
+        run: python3 scripts/zap_gate.py zap-baseline.json zap-api.json

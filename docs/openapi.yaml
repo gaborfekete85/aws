@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: Localbini API
+  version: 0.1.0
+  description: |
+    HTTP API Gateway in front of the Catalog, Booking, Payments and Identity Lambdas.
+    Protected operations need a Cognito **ID token** (`Authorization: Bearer <jwt>`),
+    verified by the API Gateway JWT authorizer. Vocabulary follows GLOSSARY.md.
+    tests/contract checks that every route in Terraform is documented here.
+servers:
+  - url: https://{apiId}.execute-api.eu-central-1.amazonaws.com
+    variables:
+      apiId:
+        default: example
+components:
+  securitySchemes:
+    cognito:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    eventId:
+      name: event_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    bookingId:
+      name: booking_id
+      in: path
+      required: true
+      schema: { type: string }
+    username:
+      name: username
+      in: path
+      required: true
+      schema: { type: string }
+    role:
+      name: role
+      in: path
+      required: true
+      schema: { type: string, enum: [organizer] }
+  schemas:
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+        request_id: { type: string }
+    Location:
+      type: object
+      required: [name, address, city]
+      properties:
+        name: { type: string }
+        address: { type: string }
+        city: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+    EventInput:
+      type: object
+      required: [title, starts_at, ends_at, places, price_cents, location]
+      properties:
+        title: { type: string, maxLength: 120 }
+        description: { type: string }
+        important_information: { type: string }
+        starts_at: { type: string, format: date-time }
+        ends_at: { type: string, format: date-time }
+        places: { type: integer, minimum: 1 }
+        price_cents: { type: integer, minimum: 0 }
+        currency: { type: string, enum: [CHF, EUR, USD, GBP] }
+        location: { $ref: '#/components/schemas/Location' }
+    Event:
+      allOf:
+        - $ref: '#/components/schemas/EventInput'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            organizer_id: { type: string }
+            status: { type: string, enum: [draft, published, cancelled] }
+            cover_picture_url: { type: string, nullable: true }
+            distance_km: { type: number, nullable: true }
+    Booking:
+      type: object
+      properties:
+        booking_id: { type: string }
+        event_id: { type: string }
+        places: { type: integer }
+        amount_cents: { type: integer }
+        currency: { type: string }
+        status: { type: string, enum: [pending, confirmed, cancelled, expired, needs_attention] }
+  responses:
+    Unauthorized:
+      description: Missing or invalid token
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Forbidden:
+      description: Authenticated but not allowed
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Not found
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Invalid:
+      description: Validation error
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+security:
+  - cognito: []
+paths:
+  /health:
+    get:
+      summary: Liveness
+      security: []
+      responses: { '200': { description: OK } }
+  /events:
+    get:
+      summary: Search Published Events by location radius and date range
+      security: []
+      parameters:
+        - { name: lat, in: query, schema: { type: number } }
+        - { name: lng, in: query, schema: { type: number } }
+        - { name: radius_km, in: query, schema: { type: number, maximum: 200 } }
+        - { name: from, in: query, schema: { type: string } }
+        - { name: to, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, maximum: 50 } }
+        - { name: offset, in: query, schema: { type: integer } }
+      responses:
+        '200': { description: A page of Events }
+        '422': { $ref: '#/components/responses/Invalid' }
+    post:
+      summary: Organizer creates a Draft Event
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EventInput' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Event' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Invalid' }
+  /events/{event_id}:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    get:
+      summary: Public Event detail (Published or Cancelled)
+      security: []
+      responses:
+        '200': { description: The Event, content: { application/json: { schema: { $ref: '#/components/schemas/Event' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      summary: Edit an Event (owner or Admin)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EventInput' } } }
+      responses:
+        '200': { description: Updated }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: Cancelled Events cannot be edited }
+  /events/{event_id}/publish:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    post:
+      summary: Draft → Published
+      responses:
+        '200': { description: Published }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: Illegal status transition }
+  /events/{event_id}/cancel:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    post:
+      summary: Published → Cancelled
+      responses:
+        '200': { description: Cancelled }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: Illegal status transition }
+  /events/{event_id}/cover-picture/upload-url:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    post:
+      summary: Short-lived presigned PUT for a Cover picture (JPEG/PNG/WebP, ≤ 5 MB)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content_type, content_length]
+              properties:
+                content_type: { type: string, enum: [image/jpeg, image/png, image/webp] }
+                content_length: { type: integer, maximum: 5242880 }
+      responses:
+        '201': { description: Upload ticket }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Invalid' }
+  /events/{event_id}/cover-picture:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    put:
+      summary: Attach an uploaded Cover picture
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, properties: { key: { type: string } } } } }
+      responses:
+        '200': { description: Attached }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Invalid' }
+  /organizer/events:
+    get:
+      summary: My Events (Admins may pass organizer_id)
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [draft, published, cancelled] } }
+        - { name: organizer_id, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Events }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /organizer/events/{event_id}:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    get:
+      summary: One of my Events, including Drafts
+      responses:
+        '200': { description: The Event }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /events/{event_id}/availability:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    get:
+      summary: Places left and price (Booking's projection)
+      security: []
+      responses:
+        '200': { description: Availability }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /events/{event_id}/bookings:
+    parameters: [{ $ref: '#/components/parameters/eventId' }]
+    post:
+      summary: Request a Booking (Hold; free Events are confirmed immediately)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [places], properties: { places: { type: integer, minimum: 1, maximum: 10 } } }
+      responses:
+        '201': { description: Booking, content: { application/json: { schema: { $ref: '#/components/schemas/Booking' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: 'Not enough places, or the Event is not open' }
+        '422': { $ref: '#/components/responses/Invalid' }
+  /me/bookings:
+    get:
+      summary: The Attendee's Bookings, newest first
+      responses:
+        '200': { description: Bookings }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /bookings/{booking_id}:
+    parameters: [{ $ref: '#/components/parameters/bookingId' }]
+    get:
+      summary: One Booking (owner or Admin)
+      responses:
+        '200': { description: Booking }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /bookings/{booking_id}/checkout:
+    parameters: [{ $ref: '#/components/parameters/bookingId' }]
+    get:
+      summary: Stripe Checkout URL for a pending Booking
+      responses:
+        '200': { description: Checkout URL }
+        '202': { description: Session still being created; retry }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /payments/stripe/webhook:
+    post:
+      summary: Stripe webhook (authenticated by the Stripe-Signature header)
+      security: []
+      parameters:
+        - { name: Stripe-Signature, in: header, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        '200': { description: Received }
+        '400': { description: Invalid signature }
+  /admin/users:
+    get:
+      summary: List users with roles (Admin)
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: next, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Users }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/users/{username}/roles/{role}:
+    parameters:
+      - { $ref: '#/components/parameters/username' }
+      - { $ref: '#/components/parameters/role' }
+    put:
+      summary: Grant the Organizer role (Admin)
+      responses:
+        '200': { description: User }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Invalid' }
+    delete:
+      summary: Revoke the Organizer role (Admin)
+      responses:
+        '200': { description: User }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }

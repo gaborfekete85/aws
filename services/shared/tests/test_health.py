@@ -27,3 +27,11 @@ def test_handles_null_fields_sent_by_http_api() -> None:
     del event["requestContext"]["resourcePath"]
     event["headers"] = None
     assert handle(event, None)["statusCode"] == 200
+
+
+def test_security_headers_on_every_response() -> None:
+    for event in (http_api_event("GET", "/health"), http_api_event("GET", "/nope")):
+        headers = handle(event, None)["headers"]
+        assert headers["X-Content-Type-Options"] == "nosniff"
+        assert headers["Cache-Control"] == "no-store"
+        assert headers["Strict-Transport-Security"].startswith("max-age=")
