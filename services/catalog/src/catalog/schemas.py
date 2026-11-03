@@ -47,6 +47,19 @@ class EventUpdate(BaseModel):
     location: LocationIn | None = None
 
 
+class CoverUploadRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    content_type: str
+    content_length: int = Field(gt=0)
+
+
+class CoverAttach(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str = Field(min_length=1, max_length=300)
+
+
 def location_out(event: Event) -> dict[str, Any]:
     loc = event.location
     return {

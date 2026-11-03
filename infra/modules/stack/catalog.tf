@@ -44,11 +44,22 @@ module "catalog_migrate" {
   vpc                      = local.catalog_vpc
 }
 
+module "media" {
+  source             = "../media"
+  name               = local.name
+  cors_allow_origins = var.web_urls
+}
+
 data "aws_iam_policy_document" "catalog_api" {
   source_policy_documents = [data.aws_iam_policy_document.catalog_db_secret.json]
   statement {
     actions   = ["events:PutEvents"]
     resources = [module.eventbridge.bus_arn]
+  }
+  # Presigning a PUT needs PutObject; attaching checks the object with HeadObject (GetObject).
+  statement {
+    actions   = ["s3:PutObject", "s3:GetObject"]
+    resources = ["${module.media.bucket_arn}/covers/*"]
   }
 }
 
@@ -63,7 +74,9 @@ module "catalog_api" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment = merge(local.common_env, local.catalog_db_env, {
-    GEOCODER_URL = "https://nominatim.openstreetmap.org/search"
+    GEOCODER_URL     = "https://nominatim.openstreetmap.org/search"
+    MEDIA_BUCKET     = module.media.bucket_name
+    MEDIA_CDN_DOMAIN = module.media.cdn_domain
   })
   policy_json = data.aws_iam_policy_document.catalog_api.json
   vpc         = local.catalog_vpc
@@ -75,6 +88,8 @@ module "catalog_api" {
     { route_key = "POST /events/{event_id}/cancel" },
     { route_key = "GET /organizer/events" },
     { route_key = "GET /organizer/events/{event_id}" },
+    { route_key = "POST /events/{event_id}/cover-picture/upload-url" },
+    { route_key = "PUT /events/{event_id}/cover-picture" },
     # Visitors search and read Events without logging in.
     { route_key = "GET /events", public = true },
     { route_key = "GET /events/{event_id}", public = true },

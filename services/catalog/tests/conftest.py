@@ -165,3 +165,24 @@ def sent_events():
         return [(e.type, e.data) for e in EventAPI().sent_events]
 
     return _sent
+
+
+@pytest.fixture
+def media(catalog_api):
+    """A moto S3 media bucket wired into the Catalog API (inside catalog_api's mock_aws)."""
+    import boto3
+    from catalog.api import CatalogResource
+    from catalog.media import CoverPictures
+
+    s3 = boto3.client("s3", region_name="eu-central-1")
+    s3.create_bucket(
+        Bucket="localbini-test-media",
+        CreateBucketConfiguration={"LocationConstraint": "eu-central-1"},
+    )
+    covers = CoverPictures("localbini-test-media", "cdn.example.net", client=s3)
+    original = CatalogResource.covers_provider
+    CatalogResource.covers_provider = staticmethod(lambda: covers)
+    try:
+        yield s3
+    finally:
+        CatalogResource.covers_provider = original

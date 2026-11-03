@@ -32,3 +32,8 @@ output "catalog_migrate_function" {
   description = "Lambda that runs Catalog migrations."
   value       = module.catalog_migrate.function_name
 }
+
+output "media_cdn_domain" {
+  description = "CloudFront domain for Cover pictures."
+  value       = module.media.cdn_domain
+}

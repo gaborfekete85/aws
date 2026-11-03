@@ -17,8 +17,9 @@ from sqlalchemy.orm import Session
 from catalog.db import session_factory
 from catalog.domain import EventStatus
 from catalog.geocoding import Geocoder, NominatimGeocoder
+from catalog.media import CoverPictures
 from catalog.repository import EventRepository
-from catalog.schemas import EventCreate, EventUpdate, event_out
+from catalog.schemas import CoverAttach, CoverUploadRequest, EventCreate, EventUpdate, event_out
 from catalog.search import SearchPage, SearchQuery, get_public, search_published
 from catalog.service import OrganizerEvents, parse_event_id
 
@@ -31,7 +32,11 @@ class CatalogResource(ApiResource):
     # Seams for tests; production uses RDS and Nominatim.
     session_provider: ClassVar[Callable[[], Session]] = staticmethod(_default_session)
     geocoder_provider: ClassVar[Callable[[], Geocoder]] = staticmethod(NominatimGeocoder)
-    cover_url_for: ClassVar[Callable[[str | None], str | None]] = staticmethod(lambda key: None)
+    covers_provider: ClassVar[Callable[[], CoverPictures]] = staticmethod(CoverPictures)
+
+    @classmethod
+    def cover_url_for(cls, key: str | None) -> str | None:
+        return cls.covers_provider().url_for(key)
 
     def _organizer_events(self, session: Session) -> OrganizerEvents:
         return OrganizerEvents(EventRepository(session), type(self).geocoder_provider())
@@ -83,6 +88,36 @@ class CatalogResource(ApiResource):
     def cancel_event(self, event_id: str) -> Response:
         eid = parse_event_id(event_id)
         return self._run(lambda s: s.cancel(self.principal, eid))
+
+    @add_route("/events/{event_id}/cover-picture/upload-url", method="POST")
+    @domain_errors
+    def cover_upload_url(self, event_id: str) -> Response:
+        data = self.body_as(CoverUploadRequest)
+        eid = parse_event_id(event_id)
+        self._run(lambda s: s.get(self.principal, eid))  # owner / Admin only
+        ticket = (
+            type(self).covers_provider().new_upload(eid, data.content_type, data.content_length)
+        )
+        return Response(
+            {
+                "key": ticket.key,
+                "upload_url": ticket.upload_url,
+                "method": "PUT",
+                "headers": ticket.headers,
+                "expires_in": ticket.expires_in,
+                "max_bytes": ticket.max_bytes,
+            },
+            status_code=201,
+        )
+
+    @add_route("/events/{event_id}/cover-picture", method="PUT")
+    @domain_errors
+    def attach_cover_picture(self, event_id: str) -> Response:
+        data = self.body_as(CoverAttach)
+        eid = parse_event_id(event_id)
+        self._run(lambda s: s.get(self.principal, eid))  # authorize before touching S3
+        type(self).covers_provider().verify_uploaded(data.key)
+        return self._run(lambda s: s.set_cover_picture(self.principal, eid, data.key))
 
     @add_route("/organizer/events", method="GET")
     @domain_errors
