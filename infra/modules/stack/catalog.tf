@@ -73,6 +73,8 @@ module "media" {
   source             = "../media"
   name               = local.name
   cors_allow_origins = local.web_origins
+  # Cover pictures in a non-empty bucket would otherwise block `terraform destroy`.
+  force_destroy = var.env != "prod"
 }
 
 data "aws_iam_policy_document" "catalog_api" {

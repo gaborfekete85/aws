@@ -44,3 +44,25 @@ run "bucket_is_private_and_served_through_oac" {
     error_message = "CDN domain is exported for the API"
   }
 }
+
+run "bucket_is_kept_with_content_by_default" {
+  command = plan
+
+  assert {
+    condition     = aws_s3_bucket.media.force_destroy == false
+    error_message = "only environments that opt in may delete a bucket with objects"
+  }
+}
+
+run "dev_can_destroy_a_non_empty_bucket" {
+  command = plan
+
+  variables {
+    force_destroy = true
+  }
+
+  assert {
+    condition     = aws_s3_bucket.media.force_destroy
+    error_message = "dev teardown must not stop at BucketNotEmpty"
+  }
+}

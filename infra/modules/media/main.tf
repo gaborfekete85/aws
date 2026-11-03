@@ -8,6 +8,12 @@ variable "cors_allow_origins" {
   type        = list(string)
 }
 
+variable "force_destroy" {
+  description = "Let `terraform destroy` delete the bucket with its objects (dev; never prod)."
+  type        = bool
+  default     = false
+}
+
 variable "price_class" {
   description = "CloudFront price class (100 = Europe + North America, cheapest)."
   type        = string
@@ -16,7 +22,8 @@ variable "price_class" {
 
 # --- private bucket ------------------------------------------------------------
 resource "aws_s3_bucket" "media" {
-  bucket = "${var.name}-media"
+  bucket        = "${var.name}-media"
+  force_destroy = var.force_destroy
 }
 
 resource "aws_s3_bucket_public_access_block" "media" {
