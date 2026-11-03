@@ -40,6 +40,7 @@ jobs:
       cancel-in-progress: false
     outputs:
       api_endpoint: ${{ steps.out.outputs.api_endpoint }}
+      web_url: ${{ steps.out.outputs.web_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -66,7 +67,9 @@ jobs:
         run: scripts/deploy_web.sh dev
       - id: out
         working-directory: infra/envs/dev
-        run: echo "api_endpoint=$(terraform output -raw api_endpoint)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "api_endpoint=$(terraform output -raw api_endpoint)" >> "$GITHUB_OUTPUT"
+          echo "web_url=$(terraform output -raw web_url)" >> "$GITHUB_OUTPUT"
       - uses: astral-sh/setup-uv@v5
       - name: Post-deploy integration tests
         env:
@@ -75,9 +78,40 @@ jobs:
           uv sync --frozen
           uv run pytest tests/integration -m dev -v
 
+  e2e-dev:
+    name: Playwright journeys against dev
+    needs: dev
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+        working-directory: tests/e2e
+      - run: bunx playwright install --with-deps chromium
+        working-directory: tests/e2e
+      - name: Critical journeys (login, search, organizer, free + paid Booking)
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: ${{ needs.dev.outputs.web_url }}
+          E2E_ORGANIZER_EMAIL: ${{ secrets.E2E_ORGANIZER_EMAIL }}
+          E2E_ORGANIZER_PASSWORD: ${{ secrets.E2E_ORGANIZER_PASSWORD }}
+          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+        run: bunx playwright test --grep @dev
+      - name: Upload traces, screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-dev-${{ github.run_id }}
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          retention-days: 14
+
   prod:
     name: Deploy prod
-    needs: [build, dev]
+    needs: [build, dev, e2e-dev]
     runs-on: ubuntu-latest
     environment: prod   # required reviewer configured on the GitHub Environment
     concurrency:

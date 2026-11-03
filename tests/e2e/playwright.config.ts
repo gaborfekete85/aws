@@ -13,12 +13,18 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  timeout: offline ? 30_000 : 90_000,
+  reporter: process.env.CI
+    ? [['list'], ['html', { open: 'never' }], ['junit', { outputFile: 'test-results/junit.xml' }]]
+    : 'list',
   use: {
     baseURL,
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    // deployed runs keep full evidence for the CI artifact; offline runs only on failure
+    trace: offline ? 'retain-on-failure' : 'on',
+    screenshot: offline ? 'only-on-failure' : 'on',
+    video: offline ? 'off' : 'retain-on-failure',
   },
+  outputDir: 'test-results',
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   grepInvert: offline ? /@dev/ : undefined,
   webServer: offline

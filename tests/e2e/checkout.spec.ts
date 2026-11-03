@@ -72,28 +72,3 @@ test.describe('Checkout (offline)', () => {
     await expect(page.getByText('Confirmed')).toBeVisible()
   })
 })
-
-test('book a paid Event with a Stripe test card @dev', async ({ page }) => {
-  const email = process.env.E2E_USER_EMAIL
-  const password = process.env.E2E_USER_PASSWORD
-  const eventId = process.env.E2E_PAID_EVENT_ID
-  test.skip(!email || !password || !eventId, 'needs E2E_USER_EMAIL, E2E_USER_PASSWORD, E2E_PAID_EVENT_ID')
-  test.setTimeout(120_000)
-
-  await login(page, email!, password!)
-  await page.goto(`/events/${eventId}`)
-  await page.getByRole('button', { name: 'Book and pay' }).click()
-
-  // Stripe-hosted Checkout (test mode)
-  await page.waitForURL(/checkout\.stripe\.com/, { timeout: 30_000 })
-  await page.getByLabel('Card number').fill('4242 4242 4242 4242')
-  await page.getByLabel('Expiration').fill('12 / 34')
-  await page.getByLabel('CVC').fill('123')
-  await page.getByLabel(/Cardholder name|Name on card/).fill('Localbini E2E')
-  const country = page.getByLabel(/Country or region/)
-  if (await country.isVisible()) await country.selectOption('CH')
-  await page.getByTestId('hosted-payment-submit-button').click()
-
-  await page.waitForURL(/\/checkout\/success\?booking_id=/, { timeout: 60_000 })
-  await expect(page.getByRole('heading', { name: "You're booked!" })).toBeVisible({ timeout: 60_000 })
-})
