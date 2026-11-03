@@ -27,6 +27,9 @@ DB=meeton_dev
 SECRET=meeton-dev-catalog-db
 SECRET_REGION=${SECRET_REGION:-eu-central-1}
 CONN_LIMIT=${CONN_LIMIT:-20}
+# The master password crosses the internet: verify the server against the RDS CAs.
+SSLMODE=${EXTERNAL_DB_SSLMODE:-verify-full}
+CA_BUNDLE="$(cd "$(dirname "$0")/.." && pwd)/services/catalog/src/catalog/rds-ca-bundle.pem"
 
 if [[ -z "${PGPASSWORD:-}" ]]; then
   read -r -s -p "Master password for ${MASTER_USER}@${HOST}: " PGPASSWORD
@@ -36,8 +39,8 @@ export PGPASSWORD
 
 # psql in a container; the password reaches it via the environment, never argv.
 psql_as_master() {
-  docker run --rm -i -e PGPASSWORD postgres:18-alpine \
-    psql "host=${HOST} port=${PORT} user=${MASTER_USER} dbname=$1 sslmode=${EXTERNAL_DB_SSLMODE:-require} connect_timeout=10" \
+  docker run --rm -i -e PGPASSWORD -v "${CA_BUNDLE}:/rds-ca.pem:ro" postgres:18-alpine \
+    psql "host=${HOST} port=${PORT} user=${MASTER_USER} dbname=$1 sslmode=${SSLMODE} sslrootcert=/rds-ca.pem require_auth=scram-sha-256 connect_timeout=10" \
     -v ON_ERROR_STOP=1 -q -X
 }
 
