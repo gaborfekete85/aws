@@ -54,7 +54,7 @@ def eventbridge_event(detail: dict[str, Any], detail_type: str) -> dict[str, Any
         "version": "0",
         "id": str(uuid.uuid4()),
         "detail-type": detail_type,
-        "source": detail.get("source", "localbini.test"),
+        "source": detail.get("source", "meeton.test"),
         "account": "123456789012",
         "time": "2026-01-01T00:00:00Z",
         "region": "eu-central-1",

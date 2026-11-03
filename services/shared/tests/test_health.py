@@ -1,7 +1,7 @@
 import json
 
-from localbini_shared.health import handle
-from localbini_shared.testing import http_api_event
+from meeton_shared.health import handle
+from meeton_shared.testing import http_api_event
 
 
 def test_health_returns_ok_through_lambda_entrypoint() -> None:

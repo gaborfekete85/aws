@@ -12,8 +12,8 @@ Terraform creates `CHANGE_ME` placeholders (write-only; real values never enter 
 
 | Parameter | Value |
 |---|---|
-| `/localbini/<env>/stripe/secret_key` | Stripe **test** secret key (Dashboard → Developers → API keys) |
-| `/localbini/<env>/stripe/webhook_secret` | signing secret of the webhook endpoint created in #26 |
+| `/meeton/<env>/stripe/secret_key` | Stripe **test** secret key (Dashboard → Developers → API keys) |
+| `/meeton/<env>/stripe/webhook_secret` | signing secret of the webhook endpoint created in #26 |
 
 ## Webhook (#26)
 
@@ -24,4 +24,4 @@ Terraform creates `CHANGE_ME` placeholders (write-only; real values never enter 
 | `checkout.session.completed` (paid) / `checkout.session.async_payment_succeeded` | `PaymentSucceeded` |
 | `checkout.session.async_payment_failed` / `checkout.session.expired` | `PaymentFailed` (`reason`) |
 
-Stripe Dashboard → Developers → Webhooks → *Add endpoint*: URL `<api_endpoint>/payments/stripe/webhook`, the four events above. Put its signing secret into `/localbini/<env>/stripe/webhook_secret`. Locally: `stripe listen --forward-to <api_endpoint>/payments/stripe/webhook`.
+Stripe Dashboard → Developers → Webhooks → *Add endpoint*: URL `<api_endpoint>/payments/stripe/webhook`, the four events above. Put its signing secret into `/meeton/<env>/stripe/webhook_secret`. Locally: `stripe listen --forward-to <api_endpoint>/payments/stripe/webhook`.

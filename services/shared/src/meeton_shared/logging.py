@@ -53,7 +53,7 @@ class JsonFormatter(logging.Formatter):
 
 def configure_logging(service: str | None = None, level: str | None = None) -> None:
     """Route all logging through one JSON handler on stdout. Idempotent."""
-    service = service or os.environ.get("SERVICE_NAME", "localbini")
+    service = service or os.environ.get("SERVICE_NAME", "meeton")
     level = level or os.environ.get("LOG_LEVEL", "INFO")
     root = logging.getLogger()
     handler = logging.StreamHandler(sys.stdout)

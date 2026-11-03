@@ -1,8 +1,8 @@
 [project]
-name = "localbini-notifications"
+name = "meeton-notifications"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = ["localbini-shared", "jinja2>=3.1"]
+dependencies = ["meeton-shared", "jinja2>=3.1"]
 
 [build-system]
 requires = ["hatchling"]

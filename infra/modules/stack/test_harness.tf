@@ -11,7 +11,7 @@ resource "aws_cloudwatch_event_rule" "bus_spy" {
   count          = var.enable_test_harness ? 1 : 0
   name           = "${local.name}-bus-spy"
   event_bus_name = module.eventbridge.bus_name
-  event_pattern  = jsonencode({ source = [{ prefix = "localbini." }] })
+  event_pattern  = jsonencode({ source = [{ prefix = "meeton." }] })
 }
 
 resource "aws_cloudwatch_event_target" "bus_spy" {

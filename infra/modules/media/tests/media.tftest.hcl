@@ -3,7 +3,7 @@ mock_provider "aws" {
     defaults = { json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}" }
   }
   mock_resource "aws_s3_bucket" {
-    defaults = { arn = "arn:aws:s3:::localbini-dev-media", bucket_regional_domain_name = "localbini-dev-media.s3.eu-central-1.amazonaws.com" }
+    defaults = { arn = "arn:aws:s3:::meeton-dev-media", bucket_regional_domain_name = "meeton-dev-media.s3.eu-central-1.amazonaws.com" }
   }
   mock_resource "aws_cloudfront_distribution" {
     defaults = { arn = "arn:aws:cloudfront::123456789012:distribution/EDFDVBD6EXAMPLE", domain_name = "d111.cloudfront.net" }
@@ -11,7 +11,7 @@ mock_provider "aws" {
 }
 
 variables {
-  name               = "localbini-dev"
+  name               = "meeton-dev"
   cors_allow_origins = ["http://localhost:5173"]
 }
 
@@ -28,7 +28,7 @@ run "bucket_is_private_and_served_through_oac" {
     error_message = "all public access must be blocked"
   }
   assert {
-    condition     = aws_s3_bucket.media.bucket == "localbini-dev-media"
+    condition     = aws_s3_bucket.media.bucket == "meeton-dev-media"
     error_message = "bucket must be env-prefixed (deploy role / boundary scoping)"
   }
   assert {

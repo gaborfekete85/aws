@@ -6,7 +6,7 @@ import type { AuthAdapter, AuthUser, Role } from './types'
  * admin@... -> admin, organizer@... -> organizer, anything else -> Attendee.
  */
 const PASSWORD = 'Password123!'
-const STORAGE_KEY = 'localbini.fakeAuth'
+const STORAGE_KEY = 'meeton.fakeAuth'
 
 function rolesFor(email: string): Role[] {
   const local = email.split('@')[0]

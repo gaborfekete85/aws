@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Identifier prefix, e.g. localbini-dev."
+  description = "Identifier prefix, e.g. meeton-dev."
   type        = string
 }
 

@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
-from localbini_shared.errors import ConflictError, ValidationError
+from meeton_shared.errors import ConflictError, ValidationError
 
 SUPPORTED_CURRENCIES = frozenset({"EUR", "CHF", "USD", "GBP"})
 MAX_TITLE = 120

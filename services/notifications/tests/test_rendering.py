@@ -6,7 +6,7 @@ from notifications.rendering import format_money, format_when, render
 
 def test_renders_subject_html_and_text() -> None:
     email = render("_smoke", {"name": "Ada", "note": "See you there"})
-    assert email.subject == "Hello from Localbini: Ada"
+    assert email.subject == "Hello from Meeton: Ada"
     assert "<p>Hi Ada,</p>" in email.html
     assert email.text.startswith("Hi Ada,")
 

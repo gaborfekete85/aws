@@ -20,18 +20,18 @@ jobs:
       postgres:
         image: postgis/postgis:16-3.4
         env:
-          POSTGRES_USER: localbini
-          POSTGRES_PASSWORD: localbini
+          POSTGRES_USER: meeton
+          POSTGRES_PASSWORD: meeton
           POSTGRES_DB: catalog
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U localbini -d catalog"
+          --health-cmd "pg_isready -U meeton -d catalog"
           --health-interval 2s --health-retries 30
       dynamodb:
         image: amazon/dynamodb-local:2.5.3
         ports: ["8000:8000"]
     env:
-      DATABASE_URL: postgresql+psycopg://localbini:localbini@localhost:5432/catalog
+      DATABASE_URL: postgresql+psycopg://meeton:meeton@localhost:5432/catalog
       DYNAMODB_ENDPOINT_URL: http://localhost:8000
     steps:
       - uses: actions/checkout@v4

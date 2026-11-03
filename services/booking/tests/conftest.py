@@ -9,8 +9,8 @@ import pytest
 os.environ.setdefault("AWS_DEFAULT_REGION", "eu-central-1")
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "testing")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "testing")
-os.environ.setdefault("EVENT_BUS_NAME", "localbini-test")
-os.environ.setdefault("BOOKINGS_TABLE", "localbini-test-bookings")
+os.environ.setdefault("EVENT_BUS_NAME", "meeton-test")
+os.environ.setdefault("BOOKINGS_TABLE", "meeton-test-bookings")
 
 FUTURE = (datetime.now(UTC) + timedelta(days=30)).replace(microsecond=0)
 
@@ -82,7 +82,7 @@ ADMIN = {"sub": "admin-1", "cognito:groups": "[admin]"}
 
 @pytest.fixture
 def bus():
-    from localbini_shared.testing import capture_lbz_events, release_lbz_events
+    from meeton_shared.testing import capture_lbz_events, release_lbz_events
 
     recorder = capture_lbz_events()
     yield recorder
@@ -94,7 +94,7 @@ def call(bookings_table, bus):
     import json
 
     from booking.api import handle
-    from localbini_shared.testing import http_api_event
+    from meeton_shared.testing import http_api_event
 
     def _call(method, route, *, claims=None, body=None, path=None):
         result = handle(

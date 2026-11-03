@@ -97,11 +97,11 @@ module "booking_consumer" {
   async_failure_queue_arn  = aws_sqs_queue.booking_dlq.arn
   event_rules = {
     catalog = jsonencode({
-      source        = ["localbini.catalog"]
+      source        = ["meeton.catalog"]
       "detail-type" = ["EventPublished", "EventUpdated", "EventCancelled"]
     })
     payments = jsonencode({
-      source        = ["localbini.payments"]
+      source        = ["meeton.payments"]
       "detail-type" = ["PaymentSucceeded", "PaymentFailed"]
     })
   }

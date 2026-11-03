@@ -41,7 +41,7 @@ module "health" {
   name                     = "${local.name}-health"
   description              = "GET /health: API Gateway -> Lambda -> lbz smoke endpoint"
   package_path             = "${var.lambda_packages_dir}/shared.zip"
-  handler                  = "localbini_shared.health.handle"
+  handler                  = "meeton_shared.health.handle"
   memory_size              = 128
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days

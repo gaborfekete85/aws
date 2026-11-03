@@ -1,10 +1,10 @@
 variable "name" {
-  description = "Name prefix, e.g. localbini-dev."
+  description = "Name prefix, e.g. meeton-dev."
   type        = string
 }
 
 variable "ssm_prefix" {
-  description = "SSM prefix for this environment, e.g. /localbini/dev."
+  description = "SSM prefix for this environment, e.g. /meeton/dev."
   type        = string
 }
 

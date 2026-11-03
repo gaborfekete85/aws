@@ -11,8 +11,8 @@ import json
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from localbini_shared.events import DomainEvent
-from localbini_shared.logging import bind_request, configure_logging, get_logger
+from meeton_shared.events import DomainEvent
+from meeton_shared.logging import bind_request, configure_logging, get_logger
 
 logger = get_logger(__name__)
 

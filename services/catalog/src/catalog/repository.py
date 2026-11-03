@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from catalog.domain import Event, EventStatus, GeoPoint, Location, Money
 from catalog.models import EventRow, LocationRow
-from localbini_shared.errors import NotFoundError
+from meeton_shared.errors import NotFoundError
 
 
 def _point_to_db(point: GeoPoint) -> object:

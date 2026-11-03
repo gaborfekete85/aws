@@ -26,7 +26,7 @@ from booking.table import (
     hold_sk,
     table_name,
 )
-from localbini_shared.errors import ConflictError
+from meeton_shared.errors import ConflictError
 
 
 class NotEnoughPlaces(ConflictError):

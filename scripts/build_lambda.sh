@@ -11,7 +11,7 @@ out="$root/dist"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
-pkg="localbini-$service"
+pkg="meeton-$service"
 mkdir -p "$out" "$work/pkg"
 
 uv export --project "$root" --package "$pkg" --no-dev --no-hashes --frozen --no-emit-workspace \
@@ -22,7 +22,7 @@ uv pip install --quiet --target "$work/pkg" \
   -r "$work/requirements.txt"
 
 # Workspace packages (shared + the service itself) are pure Python: copy sources.
-cp -R "$root/services/shared/src/localbini_shared" "$work/pkg/"
+cp -R "$root/services/shared/src/meeton_shared" "$work/pkg/"
 if [[ "$service" != "shared" ]]; then
   cp -R "$root/services/$service/src/$service" "$work/pkg/"
 fi

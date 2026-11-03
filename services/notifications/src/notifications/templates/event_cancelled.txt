@@ -4,7 +4,7 @@ We're sorry: the Organizer cancelled this Event{% if event.starts_at %}, which w
 
 Your Booking for {{ places }} place{{ "s" if places != 1 else "" }} has been cancelled.
 {% if was_confirmed %}
-If you paid for this Booking, the Localbini team will contact you about a refund.
+If you paid for this Booking, the Meeton team will contact you about a refund.
 {% endif %}
 
 Booking {{ booking_id }}

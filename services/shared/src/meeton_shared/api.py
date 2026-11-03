@@ -14,15 +14,15 @@ from lbz.response import Response
 from pydantic import BaseModel
 from pydantic import ValidationError as PydanticValidationError
 
-from localbini_shared.auth import Principal, principal_from_request_context
-from localbini_shared.errors import DomainError, to_http_error
-from localbini_shared.logging import bind_request, configure_logging, get_logger
+from meeton_shared.auth import Principal, principal_from_request_context
+from meeton_shared.errors import DomainError, to_http_error
+from meeton_shared.logging import bind_request, configure_logging, get_logger
 
 logger = get_logger(__name__)
 
 # lbz reads its own variable names; derive them from ours so deployments only set EVENT_BUS_NAME.
 os.environ.setdefault("EVENTS_BUS_NAME", os.environ.get("EVENT_BUS_NAME", ""))
-os.environ.setdefault("AWS_LAMBDA_FUNCTION_NAME", os.environ.get("SERVICE_NAME", "localbini"))
+os.environ.setdefault("AWS_LAMBDA_FUNCTION_NAME", os.environ.get("SERVICE_NAME", "meeton"))
 
 ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
@@ -54,7 +54,7 @@ def normalize_http_api_event(event: dict[str, Any]) -> dict[str, Any]:
 
 
 class ApiResource(CORSResource):
-    """Base resource for every Localbini HTTP API.
+    """Base resource for every Meeton HTTP API.
 
     - domain errors are mapped to HTTP errors
     - domain events registered during the request are sent only on success

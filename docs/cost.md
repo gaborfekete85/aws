@@ -58,7 +58,7 @@ aws serverlessrepo create-cloud-formation-change-set --stack-name lambda-power-t
   --capabilities CAPABILITY_IAM
 # then for catalog-api and booking-api:
 #   {"lambdaARN": "...", "powerValues": [256, 512, 1024, 1536], "num": 50, "strategy": "balanced",
-#    "payload": <an HTTP API event from localbini_shared.testing.http_api_event>}
+#    "payload": <an HTTP API event from meeton_shared.testing.http_api_event>}
 ```
 
 Remaining cold-start levers, not done yet (measure first): Provisioned Concurrency for `catalog-api` in prod only if p95 cold starts matter (it costs ≈ USD 10/month per warm 1 GB instance); `lbz` imports PyJWT/cryptography (≈ 0.5 s) for auth we do not use (API Gateway verifies JWTs).

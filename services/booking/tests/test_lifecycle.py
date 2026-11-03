@@ -8,9 +8,9 @@ from booking import consumers, lifecycle, places, repository
 from booking.domain import BookingStatus
 from booking.expiry import sweep
 from booking.service import request_booking
-from localbini_shared.auth import Principal
-from localbini_shared.events import EventPublisher, new_event
-from localbini_shared.testing import RecordingEventBridge, eventbridge_event
+from meeton_shared.auth import Principal
+from meeton_shared.events import EventPublisher, new_event
+from meeton_shared.testing import RecordingEventBridge, eventbridge_event
 
 ADA = Principal(user_id="ada", email="ada@example.com")
 BOB = Principal(user_id="bob", email="bob@example.com")

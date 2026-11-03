@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import time
 
-from localbini_shared.events import DomainEvent
-from localbini_shared.logging import get_logger
+from meeton_shared.events import DomainEvent
+from meeton_shared.logging import get_logger
 from notifications import sender
 from notifications.rendering import render
 

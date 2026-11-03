@@ -3,7 +3,7 @@
 For offline development and for verifying tests/smoke/load.py:
 
     docker compose up -d
-    DATABASE_URL=postgresql+psycopg://localbini:localbini@localhost:5432/catalog \\
+    DATABASE_URL=postgresql+psycopg://meeton:meeton@localhost:5432/catalog \\
     DYNAMODB_ENDPOINT_URL=http://localhost:8000 \\
       uv run python scripts/local_api.py --port 4010
 
@@ -32,7 +32,7 @@ from aiohttp import web
 
 # (method, route template, handler, public) mirroring infra/modules/stack routes
 ROUTES: list[tuple[str, str, str, bool]] = [
-    ("GET", "/health", "localbini_shared.health:handle", True),
+    ("GET", "/health", "meeton_shared.health:handle", True),
     ("GET", "/events", "catalog.api:handle", True),
     ("GET", "/events/{event_id}", "catalog.api:handle", True),
     ("POST", "/events", "catalog.api:handle", False),
@@ -62,13 +62,13 @@ COMPILED = [(m, _compile(t), t, h, p) for m, t, h, p in ROUTES]
 
 # --- worker process ----------------------------------------------------------------
 def _worker_init() -> None:
-    os.environ.setdefault("EVENT_BUS_NAME", "localbini-local")
-    os.environ.setdefault("BOOKINGS_TABLE", "localbini-local-bookings")
+    os.environ.setdefault("EVENT_BUS_NAME", "meeton-local")
+    os.environ.setdefault("BOOKINGS_TABLE", "meeton-local-bookings")
     os.environ.setdefault("AWS_DEFAULT_REGION", "eu-central-1")
     os.environ.setdefault("AWS_ACCESS_KEY_ID", "local")
     os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "local")
     os.environ.setdefault("CORS_ORIGINS", "*")
-    from localbini_shared import testing
+    from meeton_shared import testing
 
     testing.capture_lbz_events()  # lbz PutEvents -> in-process recorder
 
@@ -79,7 +79,7 @@ def _invoke(handler_ref: str, event: dict[str, Any]) -> tuple[Any, list[dict[str
 
     from lbz.aws_boto3 import client
 
-    from localbini_shared import events as shared_events
+    from meeton_shared import events as shared_events
 
     recorder = client.__dict__["eventbridge"]
     recorder.entries.clear()
@@ -88,7 +88,7 @@ def _invoke(handler_ref: str, event: dict[str, Any]) -> tuple[Any, list[dict[str
     original = shared_events.EventPublisher.__init__
 
     def capture_publisher(self: Any, bus_name: str | None = None, client_: Any = None) -> None:
-        original(self, bus_name or "localbini-local", client_ or recorder)
+        original(self, bus_name or "meeton-local", client_ or recorder)
 
     shared_events.EventPublisher.__init__ = capture_publisher  # type: ignore[method-assign]
     try:
@@ -154,7 +154,7 @@ class LocalApi:
             claims = _claims(request.headers.get("Authorization"))
             if not public and claims is None:
                 return _cors(web.json_response({"message": "Unauthorized"}, status=401))
-            from localbini_shared.testing import http_api_event
+            from meeton_shared.testing import http_api_event
 
             query = {k: request.query.getall(k) for k in request.query}
             event = http_api_event(
@@ -179,13 +179,13 @@ def ensure_bookings_table() -> None:
     os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "local")
     from booking import table
 
-    name = os.environ.setdefault("BOOKINGS_TABLE", "localbini-local-bookings")
+    name = os.environ.setdefault("BOOKINGS_TABLE", "meeton-local-bookings")
     if name not in table.client().list_tables()["TableNames"]:
         table.client().create_table(**table.table_definition(name))
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Local Localbini API (development only)")
+    parser = argparse.ArgumentParser(description="Local Meeton API (development only)")
     parser.add_argument("--port", type=int, default=4010)
     parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args()

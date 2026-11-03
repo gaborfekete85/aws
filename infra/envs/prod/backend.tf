@@ -10,7 +10,7 @@ terraform {
 
   # Bucket comes from infra/bootstrap; CI may override with -backend-config=bucket=...
   backend "s3" {
-    bucket       = "localbini-tfstate-190016928273"
+    bucket       = "meeton-tfstate-190016928273"
     key          = "envs/prod/terraform.tfstate"
     region       = "eu-central-1"
     encrypt      = true

@@ -1,1 +1,1 @@
-"""Localbini booking service."""
+"""Meeton booking service."""

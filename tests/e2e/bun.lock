@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "localbini-e2e",
+      "name": "meeton-e2e",
       "devDependencies": {
         "@playwright/test": "^1.64.1",
         "@types/node": "^24.19.2",

@@ -8,8 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from booking import service
 from booking.domain import MAX_PLACES_PER_BOOKING
-from localbini_shared.api import ApiResource, domain_errors, make_http_handler
-from localbini_shared.events import register
+from meeton_shared.api import ApiResource, domain_errors, make_http_handler
+from meeton_shared.events import register
 
 
 class BookingRequest(BaseModel):

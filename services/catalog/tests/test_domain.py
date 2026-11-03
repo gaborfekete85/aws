@@ -11,7 +11,7 @@ from catalog.domain import (
     Location,
     Money,
 )
-from localbini_shared.errors import ConflictError, ValidationError
+from meeton_shared.errors import ConflictError, ValidationError
 
 NOW = datetime(2026, 11, 3, 12, 0, tzinfo=UTC)
 

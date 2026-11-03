@@ -14,7 +14,7 @@ from alembic.config import Config
 from sqlalchemy import text
 
 from catalog.db import get_engine
-from localbini_shared.logging import configure_logging, get_logger
+from meeton_shared.logging import configure_logging, get_logger
 
 logger = get_logger(__name__)
 

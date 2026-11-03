@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from catalog.domain import Event
-from localbini_shared.events import DomainEvent, new_event
+from meeton_shared.events import DomainEvent, new_event
 
 SERVICE = "catalog"
 

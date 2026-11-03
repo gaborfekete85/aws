@@ -64,7 +64,7 @@ describe('AdminPage', () => {
   })
 
   it('sends the ID token', async () => {
-    window.localStorage.setItem('localbini.fakeAuth', JSON.stringify(users.admin))
+    window.localStorage.setItem('meeton.fakeAuth', JSON.stringify(users.admin))
     const { calls } = mockFetch({ 'GET /admin/users': () => ({ items: [], next_token: null }) })
     renderWithProviders(<AdminPage />, { preloadedState: signedIn(users.admin) })
     await waitFor(() => expect(calls.length).toBeGreaterThan(0))

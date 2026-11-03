@@ -15,7 +15,7 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 
-from localbini_shared.errors import ValidationError
+from meeton_shared.errors import ValidationError
 
 ALLOWED_CONTENT_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
 MAX_BYTES = 5 * 1024 * 1024

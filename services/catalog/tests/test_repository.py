@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from catalog.domain import EventStatus, GeoPoint, Location
 from catalog.repository import EventRepository
-from localbini_shared.errors import NotFoundError
+from meeton_shared.errors import NotFoundError
 
 pytestmark = pytest.mark.integration
 

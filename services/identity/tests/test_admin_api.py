@@ -8,11 +8,11 @@ import pytest
 os.environ.setdefault("AWS_DEFAULT_REGION", "eu-central-1")
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "testing")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "testing")
-os.environ.setdefault("EVENT_BUS_NAME", "localbini-test")
+os.environ.setdefault("EVENT_BUS_NAME", "meeton-test")
 
 from identity import users
 from identity.api import handle
-from localbini_shared.testing import http_api_event
+from meeton_shared.testing import http_api_event
 
 ADMIN = {"sub": "admin-sub", "cognito:groups": "[admin]"}
 ORGANIZER = {"sub": "org-sub", "cognito:groups": "[organizer]"}

@@ -28,7 +28,7 @@ def sender_address() -> str:
 
 def send(to: str, email: Email) -> str:
     response = ses().send_email(
-        FromEmailAddress=f"Localbini <{sender_address()}>",
+        FromEmailAddress=f"Meeton <{sender_address()}>",
         Destination={"ToAddresses": [to]},
         Content={
             "Simple": {
@@ -39,7 +39,7 @@ def send(to: str, email: Email) -> str:
                 },
             }
         },
-        EmailTags=[{"Name": "app", "Value": "localbini"}],
+        EmailTags=[{"Name": "app", "Value": "meeton"}],
     )
     message_id: str = response["MessageId"]
     return message_id

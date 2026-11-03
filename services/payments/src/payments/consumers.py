@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from localbini_shared.consumers import make_event_handler
-from localbini_shared.events import DomainEvent
+from meeton_shared.consumers import make_event_handler
+from meeton_shared.events import DomainEvent
 from payments.checkout import on_booking_requested, on_hold_expired
 
 

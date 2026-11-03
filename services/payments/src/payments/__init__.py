@@ -1,1 +1,1 @@
-"""Localbini payments service."""
+"""Meeton payments service."""

@@ -3,7 +3,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      project = "localbini"
+      project = "meeton"
       env     = "dev"
       owner   = var.owner
     }

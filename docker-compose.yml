@@ -4,12 +4,12 @@ services:
     image: postgis/postgis:16-3.4
     platform: linux/amd64
     environment:
-      POSTGRES_USER: localbini
-      POSTGRES_PASSWORD: localbini
+      POSTGRES_USER: meeton
+      POSTGRES_PASSWORD: meeton
       POSTGRES_DB: catalog
     ports: ["5432:5432"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U localbini -d catalog"]
+      test: ["CMD-SHELL", "pg_isready -U meeton -d catalog"]
       interval: 2s
       retries: 30
   dynamodb:

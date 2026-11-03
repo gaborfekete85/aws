@@ -1,4 +1,4 @@
-# Localbini
+# Meeton
 
 Book places at local Events. Organizers publish Events at a Location and date; Visitors find them by location and date and pay to book.
 

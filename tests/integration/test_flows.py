@@ -11,7 +11,7 @@ def test_publish_emits_event_published_and_feeds_booking(http, bus, make_event) 
     event = make_event(places=7, price_cents=1500)
 
     published = bus.wait_for("EventPublished", lambda d: d["event_id"] == event["id"])
-    assert published["source"] == "localbini.catalog"
+    assert published["source"] == "meeton.catalog"
     assert published["data"]["places"] == 7
     assert published["data"]["price_cents"] == 1500
 

@@ -1,7 +1,7 @@
 import json
 import logging
 
-from localbini_shared.logging import JsonFormatter, bind_request
+from meeton_shared.logging import JsonFormatter, bind_request
 
 
 def test_json_formatter_includes_ids_and_extra_fields() -> None:

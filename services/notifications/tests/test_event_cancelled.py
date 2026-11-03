@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from localbini_shared.events import new_event
+from meeton_shared.events import new_event
 from notifications import sender
 from notifications.app import handle
 from notifications.fanout import RateLimiter, fan_out

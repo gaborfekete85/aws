@@ -6,7 +6,7 @@ from lbz.response import Response
 from lbz.router import add_route
 
 from identity import users
-from localbini_shared.api import ApiResource, domain_errors, make_http_handler
+from meeton_shared.api import ApiResource, domain_errors, make_http_handler
 
 
 class IdentityAdminResource(ApiResource):

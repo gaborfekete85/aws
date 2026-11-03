@@ -1,6 +1,6 @@
 """SQS consumption with partial-batch failures."""
 
-from localbini_shared.events import new_event
+from meeton_shared.events import new_event
 from notifications.handler import process_batch
 
 from .conftest import sqs_record

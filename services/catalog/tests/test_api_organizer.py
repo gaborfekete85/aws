@@ -63,7 +63,7 @@ def test_publish_emits_event_published_with_places_and_price(call, event_body, s
     [(type_, detail)] = sent_events()
     assert type_ == "EventPublished"
     assert detail["type"] == "EventPublished"
-    assert detail["source"] == "localbini.catalog"
+    assert detail["source"] == "meeton.catalog"
     assert detail["data"]["event_id"] == event_id
     assert detail["data"]["places"] == 40
     assert detail["data"]["price_cents"] == 2500

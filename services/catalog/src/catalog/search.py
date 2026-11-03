@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from catalog.domain import Event, EventStatus, utcnow
 from catalog.models import EventRow, LocationRow
 from catalog.repository import event_from_row
-from localbini_shared.errors import ValidationError
+from meeton_shared.errors import ValidationError
 
 MAX_RADIUS_KM = 200.0
 DEFAULT_RADIUS_KM = 25.0
@@ -116,7 +116,7 @@ def search_published(session: Session, query: SearchQuery) -> SearchPage:
 
 def get_public(session: Session, event: Event) -> Event:
     """Visitors may see Published and Cancelled Events (Attendees learn about cancellations)."""
-    from localbini_shared.errors import NotFoundError
+    from meeton_shared.errors import NotFoundError
 
     if event.is_draft:
         raise NotFoundError("Event not found")

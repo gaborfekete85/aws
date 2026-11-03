@@ -8,8 +8,8 @@ import pytest
 os.environ.setdefault("AWS_DEFAULT_REGION", "eu-central-1")
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "testing")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "testing")
-os.environ.setdefault("EVENT_BUS_NAME", "localbini-test")
-os.environ.setdefault("PAYMENTS_TABLE", "localbini-test-payments")
+os.environ.setdefault("EVENT_BUS_NAME", "meeton-test")
+os.environ.setdefault("PAYMENTS_TABLE", "meeton-test-payments")
 
 
 @pytest.fixture

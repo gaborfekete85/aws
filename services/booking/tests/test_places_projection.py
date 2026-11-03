@@ -2,8 +2,8 @@
 
 from booking import places
 from booking.consumers import handle
-from localbini_shared.events import new_event
-from localbini_shared.testing import eventbridge_event
+from meeton_shared.events import new_event
+from meeton_shared.testing import eventbridge_event
 
 
 def snapshot(event_id: str, **overrides):

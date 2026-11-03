@@ -4,7 +4,7 @@ Emails Attendees through SES. Bus events reach the Lambda through SQS:
 
 ```
 EventBridge rule (BookingConfirmed, EventBookingsCancelled)
-  → SQS localbini-<env>-notifications (visibility 6 min, maxReceiveCount 5)
+  → SQS meeton-<env>-notifications (visibility 6 min, maxReceiveCount 5)
       → Lambda (batch 5, ReportBatchItemFailures)        ↘ DLQ after 5 failed receives
 ```
 

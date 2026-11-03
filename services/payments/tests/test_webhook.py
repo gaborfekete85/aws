@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from localbini_shared.events import PublishError
-from localbini_shared.testing import RecordingEventBridge
+from meeton_shared.events import PublishError
+from meeton_shared.testing import RecordingEventBridge
 from payments import store
 from payments.gateway import StripeGateway
 from payments.webhook import InvalidSignature, process
@@ -42,7 +42,7 @@ def bus():
 
 @pytest.fixture
 def publisher(bus):
-    from localbini_shared.events import EventPublisher
+    from meeton_shared.events import EventPublisher
 
     return EventPublisher("bus", client=bus)
 
@@ -141,7 +141,7 @@ class BrokenBus:
 def test_bus_failure_makes_stripe_retry_instead_of_losing_the_payment(
     payments_table, gateway, bus
 ) -> None:
-    from localbini_shared.events import EventPublisher
+    from meeton_shared.events import EventPublisher
 
     body = payload("checkout.session.completed.json")
     with pytest.raises(PublishError):
@@ -153,7 +153,7 @@ def test_bus_failure_makes_stripe_retry_instead_of_losing_the_payment(
 
 
 def test_webhook_route_returns_400_on_bad_signature(payments_table, monkeypatch) -> None:
-    from localbini_shared.testing import http_api_event
+    from meeton_shared.testing import http_api_event
     from payments import webhook
     from payments.api import handle
 
@@ -169,8 +169,8 @@ def test_webhook_route_returns_400_on_bad_signature(payments_table, monkeypatch)
 
 
 def test_webhook_route_verifies_the_raw_body(payments_table, monkeypatch, bus) -> None:
-    from localbini_shared.events import EventPublisher
-    from localbini_shared.testing import http_api_event
+    from meeton_shared.events import EventPublisher
+    from meeton_shared.testing import http_api_event
     from payments import webhook
     from payments.api import handle
 

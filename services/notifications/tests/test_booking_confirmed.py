@@ -1,6 +1,6 @@
 """BookingConfirmed → one confirmation email, even on redelivery."""
 
-from localbini_shared.events import new_event
+from meeton_shared.events import new_event
 from notifications.app import handle
 
 from .conftest import sqs_record

@@ -5,10 +5,10 @@ from lbz.response import Response
 from lbz.router import add_route
 from pydantic import BaseModel
 
-from localbini_shared.api import ApiResource, domain_errors, make_http_handler
-from localbini_shared.errors import ConflictError
-from localbini_shared.events import new_event, register
-from localbini_shared.testing import http_api_event
+from meeton_shared.api import ApiResource, domain_errors, make_http_handler
+from meeton_shared.errors import ConflictError
+from meeton_shared.events import new_event, register
+from meeton_shared.testing import http_api_event
 
 
 class Payload(BaseModel):

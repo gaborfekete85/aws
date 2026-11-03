@@ -8,8 +8,8 @@ import pytest
 os.environ.setdefault("AWS_DEFAULT_REGION", "eu-central-1")
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "testing")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "testing")
-os.environ.setdefault("EVENT_BUS_NAME", "localbini-test")
-os.environ.setdefault("SENDER_EMAIL", "no-reply@localbini.test")
+os.environ.setdefault("EVENT_BUS_NAME", "meeton-test")
+os.environ.setdefault("SENDER_EMAIL", "no-reply@meeton.test")
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def outbox():
 def sqs_record(detail_type: str, detail: dict, message_id: str | None = None) -> dict:
     import json
 
-    from localbini_shared.testing import eventbridge_event
+    from meeton_shared.testing import eventbridge_event
 
     return {
         "messageId": message_id or str(uuid.uuid4()),

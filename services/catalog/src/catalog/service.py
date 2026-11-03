@@ -16,9 +16,9 @@ from catalog.geocoding import Geocoder
 from catalog.locations import LocationInput, location_changed, resolve_location
 from catalog.repository import EventRepository
 from catalog.schemas import EventCreate, EventUpdate
-from localbini_shared.auth import Principal, Role, require_owner_or_admin, require_role
-from localbini_shared.errors import ForbiddenError, NotFoundError, ValidationError
-from localbini_shared.events import DomainEvent
+from meeton_shared.auth import Principal, Role, require_owner_or_admin, require_role
+from meeton_shared.errors import ForbiddenError, NotFoundError, ValidationError
+from meeton_shared.events import DomainEvent
 
 
 def parse_event_id(raw: str) -> uuid.UUID:

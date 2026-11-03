@@ -1,7 +1,7 @@
 variable "project" {
   description = "Project name."
   type        = string
-  default     = "localbini"
+  default     = "meeton"
 }
 
 variable "env" {
@@ -65,7 +65,7 @@ variable "hold_minutes" {
 }
 
 variable "sender_email" {
-  description = "SES identity Localbini sends email from."
+  description = "SES identity Meeton sends email from."
   type        = string
 }
 

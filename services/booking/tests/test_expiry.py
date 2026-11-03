@@ -10,8 +10,8 @@ from booking.domain import BookingStatus
 from booking.expiry import sweep
 from booking.holds import HoldGone, convert_hold
 from booking.service import request_booking
-from localbini_shared.auth import Principal
-from localbini_shared.testing import RecordingEventBridge
+from meeton_shared.auth import Principal
+from meeton_shared.testing import RecordingEventBridge
 
 ADA = Principal(user_id="ada", email="ada@example.com")
 
@@ -21,7 +21,7 @@ class Publisher:
         self.recorder = RecordingEventBridge()
 
     def publish(self, events):
-        from localbini_shared.events import EventPublisher
+        from meeton_shared.events import EventPublisher
 
         return EventPublisher("bus", client=self.recorder).publish(events)
 

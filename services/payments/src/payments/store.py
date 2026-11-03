@@ -16,7 +16,7 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 
-from localbini_shared.errors import NotFoundError
+from meeton_shared.errors import NotFoundError
 
 
 def table_name() -> str:

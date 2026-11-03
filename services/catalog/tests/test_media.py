@@ -8,7 +8,7 @@ import pytest
 from moto import mock_aws
 
 from catalog.media import MAX_BYTES, CoverPictures
-from localbini_shared.errors import ValidationError
+from meeton_shared.errors import ValidationError
 
 from .conftest import ORGANIZER, OTHER_ORGANIZER
 
@@ -82,7 +82,7 @@ def test_upload_then_attach_returns_cloudfront_url(call, event_body, media) -> N
 
     # the browser PUTs the file; simulate it
     media.put_object(
-        Bucket="localbini-test-media", Key=ticket["key"], Body=b"x" * 2048, ContentType="image/webp"
+        Bucket="meeton-test-media", Key=ticket["key"], Body=b"x" * 2048, ContentType="image/webp"
     )
     status, body = call(
         "PUT",
@@ -102,7 +102,7 @@ def test_cannot_attach_a_key_from_another_event(call, event_body, media) -> None
     _, other = call("POST", "/events", claims=ORGANIZER, body=event_body(title="Other"))
     foreign_key = f"covers/{other['id']}/x.jpg"
     media.put_object(
-        Bucket="localbini-test-media", Key=foreign_key, Body=b"x", ContentType="image/jpeg"
+        Bucket="meeton-test-media", Key=foreign_key, Body=b"x", ContentType="image/jpeg"
     )
     status, _ = call(
         "PUT",

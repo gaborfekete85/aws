@@ -10,10 +10,10 @@ def test_health_handler_works_with_only_event_bus_name_set() -> None:
         for k, v in os.environ.items()
         if k not in {"EVENTS_BUS_NAME", "AWS_LAMBDA_FUNCTION_NAME"}
     }
-    env["EVENT_BUS_NAME"] = "localbini-dev"
+    env["EVENT_BUS_NAME"] = "meeton-dev"
     code = (
-        "from localbini_shared.health import handle;"
-        "from localbini_shared.testing import http_api_event;"
+        "from meeton_shared.health import handle;"
+        "from meeton_shared.testing import http_api_event;"
         "print(handle(http_api_event('GET', '/health'), None)['statusCode'])"
     )
     out = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True)

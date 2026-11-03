@@ -2,16 +2,16 @@ import json
 
 import pytest
 
-from localbini_shared.events import DomainEvent, EventPublisher, PublishError, new_event
-from localbini_shared.logging import bind_request
-from localbini_shared.testing import eventbridge_event
+from meeton_shared.events import DomainEvent, EventPublisher, PublishError, new_event
+from meeton_shared.logging import bind_request
+from meeton_shared.testing import eventbridge_event
 
 
 def test_envelope_round_trips_through_eventbridge_shape() -> None:
     event = new_event("EventPublished", {"event_id": "e1", "places": 10}, service="catalog")
     parsed = DomainEvent.from_eventbridge(eventbridge_event(event.to_detail(), event.type))
     assert parsed == event
-    assert parsed.source == "localbini.catalog"
+    assert parsed.source == "meeton.catalog"
 
 
 def test_envelope_parses_string_detail_from_sqs() -> None:
@@ -26,7 +26,7 @@ def test_new_event_carries_correlation_id() -> None:
 
 
 def test_publisher_puts_events_in_batches(bus) -> None:
-    publisher = EventPublisher("localbini-test", client=bus)
+    publisher = EventPublisher("meeton-test", client=bus)
     events = [new_event("Ping", {"i": i}, service="test") for i in range(23)]
     assert publisher.publish(events) == []
 

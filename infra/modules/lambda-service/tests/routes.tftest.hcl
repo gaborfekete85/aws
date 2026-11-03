@@ -3,21 +3,21 @@ mock_provider "aws" {
     defaults = { json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}" }
   }
   mock_resource "aws_iam_role" {
-    defaults = { arn = "arn:aws:iam::123456789012:role/localbini-test-fn" }
+    defaults = { arn = "arn:aws:iam::123456789012:role/meeton-test-fn" }
   }
   mock_resource "aws_lambda_function" {
     defaults = {
-      arn        = "arn:aws:lambda:eu-central-1:123456789012:function:localbini-test-fn"
+      arn        = "arn:aws:lambda:eu-central-1:123456789012:function:meeton-test-fn"
       invoke_arn = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/fn/invocations"
     }
   }
 }
 
 variables {
-  name                     = "localbini-test-fn"
+  name                     = "meeton-test-fn"
   package_path             = "tests/fixture.zip"
   handler                  = "h.handle"
-  permissions_boundary_arn = "arn:aws:iam::123456789012:policy/localbini-workload-boundary"
+  permissions_boundary_arn = "arn:aws:iam::123456789012:policy/meeton-workload-boundary"
   api = {
     api_id        = "api123"
     execution_arn = "arn:aws:execute-api:eu-central-1:123456789012:api123"

@@ -1,1 +1,1 @@
-"""Localbini catalog service."""
+"""Meeton catalog service."""

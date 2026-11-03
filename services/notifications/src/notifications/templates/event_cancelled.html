@@ -5,7 +5,7 @@
   <p>We're sorry: the Organizer cancelled this Event{% if event.starts_at %}, which was planned for {{ event.starts_at | when }}{% endif %}{% if event.location.name %} at {{ event.location.name }}{% endif %}.</p>
   <p>Your Booking for {{ places }} place{{ "s" if places != 1 else "" }} has been cancelled.</p>
   {% if was_confirmed %}
-  <p>If you paid for this Booking, the Localbini team will contact you about a refund.</p>
+  <p>If you paid for this Booking, the Meeton team will contact you about a refund.</p>
   {% endif %}
   <p style="color: #6b7280; font-size: 12px; margin-top: 32px;">Booking {{ booking_id }}</p>
 </body>

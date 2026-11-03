@@ -8,13 +8,13 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "localbini",
-    "localbini-booking",
-    "localbini-catalog",
-    "localbini-identity",
-    "localbini-notifications",
-    "localbini-payments",
-    "localbini-shared",
+    "meeton",
+    "meeton-booking",
+    "meeton-catalog",
+    "meeton-identity",
+    "meeton-notifications",
+    "meeton-payments",
+    "meeton-shared",
 ]
 
 [[package]]
@@ -1029,7 +1029,7 @@ wheels = [
 ]
 
 [[package]]
-name = "localbini"
+name = "meeton"
 version = "0.1.0"
 source = { virtual = "." }
 
@@ -1039,12 +1039,12 @@ dev = [
     { name = "aioresponses" },
     { name = "boto3-stubs", extra = ["cognito-idp", "essential", "events", "secretsmanager", "ses", "ssm"] },
     { name = "httpx" },
-    { name = "localbini-booking" },
-    { name = "localbini-catalog" },
-    { name = "localbini-identity" },
-    { name = "localbini-notifications" },
-    { name = "localbini-payments" },
-    { name = "localbini-shared" },
+    { name = "meeton-booking" },
+    { name = "meeton-catalog" },
+    { name = "meeton-identity" },
+    { name = "meeton-notifications" },
+    { name = "meeton-payments" },
+    { name = "meeton-shared" },
     { name = "moto", extra = ["cognitoidp", "dynamodb", "events", "s3", "ssm"] },
     { name = "mypy" },
     { name = "openapi-spec-validator" },
@@ -1063,12 +1063,12 @@ dev = [
     { name = "aioresponses", specifier = ">=0.7.7" },
     { name = "boto3-stubs", extras = ["essential", "events", "cognito-idp", "ses", "ssm", "secretsmanager"], specifier = ">=1.35" },
     { name = "httpx", specifier = ">=0.27" },
-    { name = "localbini-booking", editable = "services/booking" },
-    { name = "localbini-catalog", editable = "services/catalog" },
-    { name = "localbini-identity", editable = "services/identity" },
-    { name = "localbini-notifications", editable = "services/notifications" },
-    { name = "localbini-payments", editable = "services/payments" },
-    { name = "localbini-shared", editable = "services/shared" },
+    { name = "meeton-booking", editable = "services/booking" },
+    { name = "meeton-catalog", editable = "services/catalog" },
+    { name = "meeton-identity", editable = "services/identity" },
+    { name = "meeton-notifications", editable = "services/notifications" },
+    { name = "meeton-payments", editable = "services/payments" },
+    { name = "meeton-shared", editable = "services/shared" },
     { name = "moto", extras = ["events", "dynamodb", "sqs", "ses", "ssm", "s3", "cognitoidp", "secretsmanager"], specifier = ">=5.0" },
     { name = "mypy", specifier = ">=1.13" },
     { name = "openapi-spec-validator", specifier = ">=0.7" },
@@ -1080,25 +1080,25 @@ dev = [
 ]
 
 [[package]]
-name = "localbini-booking"
+name = "meeton-booking"
 version = "0.1.0"
 source = { editable = "services/booking" }
 dependencies = [
-    { name = "localbini-shared" },
+    { name = "meeton-shared" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "localbini-shared", editable = "services/shared" }]
+requires-dist = [{ name = "meeton-shared", editable = "services/shared" }]
 
 [[package]]
-name = "localbini-catalog"
+name = "meeton-catalog"
 version = "0.1.0"
 source = { editable = "services/catalog" }
 dependencies = [
     { name = "aiohttp" },
     { name = "alembic" },
     { name = "geoalchemy2" },
-    { name = "localbini-shared" },
+    { name = "meeton-shared" },
     { name = "psycopg", extra = ["binary"] },
     { name = "sqlalchemy" },
 ]
@@ -1108,54 +1108,54 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.12,<3.13" },
     { name = "alembic", specifier = ">=1.14" },
     { name = "geoalchemy2", specifier = ">=0.16" },
-    { name = "localbini-shared", editable = "services/shared" },
+    { name = "meeton-shared", editable = "services/shared" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
     { name = "sqlalchemy", specifier = ">=2.0.36" },
 ]
 
 [[package]]
-name = "localbini-identity"
+name = "meeton-identity"
 version = "0.1.0"
 source = { editable = "services/identity" }
 dependencies = [
-    { name = "localbini-shared" },
+    { name = "meeton-shared" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "localbini-shared", editable = "services/shared" }]
+requires-dist = [{ name = "meeton-shared", editable = "services/shared" }]
 
 [[package]]
-name = "localbini-notifications"
+name = "meeton-notifications"
 version = "0.1.0"
 source = { editable = "services/notifications" }
 dependencies = [
     { name = "jinja2" },
-    { name = "localbini-shared" },
+    { name = "meeton-shared" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "jinja2", specifier = ">=3.1" },
-    { name = "localbini-shared", editable = "services/shared" },
+    { name = "meeton-shared", editable = "services/shared" },
 ]
 
 [[package]]
-name = "localbini-payments"
+name = "meeton-payments"
 version = "0.1.0"
 source = { editable = "services/payments" }
 dependencies = [
-    { name = "localbini-shared" },
+    { name = "meeton-shared" },
     { name = "stripe" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "localbini-shared", editable = "services/shared" },
+    { name = "meeton-shared", editable = "services/shared" },
     { name = "stripe", specifier = ">=11" },
 ]
 
 [[package]]
-name = "localbini-shared"
+name = "meeton-shared"
 version = "0.1.0"
 source = { editable = "services/shared" }
 dependencies = [

@@ -1,8 +1,8 @@
 import pytest
 
-from localbini_shared.consumers import make_event_handler
-from localbini_shared.events import new_event
-from localbini_shared.testing import eventbridge_event
+from meeton_shared.consumers import make_event_handler
+from meeton_shared.events import new_event
+from meeton_shared.testing import eventbridge_event
 
 
 def test_dispatches_by_detail_type_with_domain_event() -> None:

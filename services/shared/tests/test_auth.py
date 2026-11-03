@@ -2,7 +2,7 @@
 
 import pytest
 
-from localbini_shared.auth import (
+from meeton_shared.auth import (
     ANONYMOUS,
     Principal,
     Role,
@@ -13,7 +13,7 @@ from localbini_shared.auth import (
     require_owner_or_admin,
     require_role,
 )
-from localbini_shared.errors import ForbiddenError, UnauthenticatedError
+from meeton_shared.errors import ForbiddenError, UnauthenticatedError
 
 VISITOR = ANONYMOUS
 ATTENDEE = Principal(user_id="u-attendee", email="a@example.com")

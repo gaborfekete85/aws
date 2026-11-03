@@ -8,7 +8,7 @@ from sqlalchemy import text
 from catalog.domain import GeoPoint, Location
 from catalog.repository import EventRepository
 from catalog.search import SearchQuery, search_published
-from localbini_shared.errors import ValidationError
+from meeton_shared.errors import ValidationError
 
 pytestmark = pytest.mark.integration
 

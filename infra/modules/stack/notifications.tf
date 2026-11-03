@@ -26,7 +26,7 @@ resource "aws_cloudwatch_event_rule" "notifications" {
   name           = "${local.name}-notifications"
   event_bus_name = module.eventbridge.bus_name
   event_pattern = jsonencode({
-    source        = ["localbini.booking"]
+    source        = ["meeton.booking"]
     "detail-type" = ["BookingConfirmed", "EventBookingsCancelled"]
   })
 }

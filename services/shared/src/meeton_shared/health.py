@@ -7,7 +7,7 @@ import os
 from lbz.response import Response
 from lbz.router import add_route
 
-from localbini_shared.api import ApiResource, make_http_handler
+from meeton_shared.api import ApiResource, make_http_handler
 
 
 class HealthResource(ApiResource):
@@ -16,7 +16,7 @@ class HealthResource(ApiResource):
         return Response(
             {
                 "status": "ok",
-                "service": os.environ.get("SERVICE_NAME", "localbini"),
+                "service": os.environ.get("SERVICE_NAME", "meeton"),
                 "env": os.environ.get("ENV", "local"),
                 "version": os.environ.get("APP_VERSION", "dev"),
             }

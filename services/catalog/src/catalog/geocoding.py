@@ -16,13 +16,13 @@ from typing import Any, Protocol
 import aiohttp
 
 from catalog.domain import GeoPoint
-from localbini_shared.errors import ValidationError
-from localbini_shared.logging import get_logger
+from meeton_shared.errors import ValidationError
+from meeton_shared.logging import get_logger
 
 logger = get_logger(__name__)
 
 DEFAULT_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "Localbini/0.1 (+https://github.com/gaborfekete85/aws)"
+USER_AGENT = "Meeton/0.1 (+https://github.com/gaborfekete85/aws)"
 RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
 
 

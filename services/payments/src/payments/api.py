@@ -5,7 +5,7 @@ from __future__ import annotations
 from lbz.response import Response
 from lbz.router import add_route
 
-from localbini_shared.api import ApiResource, domain_errors, make_http_handler
+from meeton_shared.api import ApiResource, domain_errors, make_http_handler
 from payments.checkout import checkout_for
 from payments.webhook import process
 

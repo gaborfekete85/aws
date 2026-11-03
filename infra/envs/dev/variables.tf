@@ -16,6 +16,6 @@ variable "alert_emails" {
 }
 
 variable "sender_email" {
-  description = "Verified SES identity Localbini sends from (TF_VAR_sender_email)."
+  description = "Verified SES identity Meeton sends from (TF_VAR_sender_email)."
   type        = string
 }

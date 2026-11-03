@@ -36,7 +36,7 @@ const availability = (left = 12, price = 2500) => ({
 })
 
 function renderEventPage(user: typeof users.attendee | null = users.attendee) {
-  if (user) window.localStorage.setItem('localbini.fakeAuth', JSON.stringify(user)) // fake session token
+  if (user) window.localStorage.setItem('meeton.fakeAuth', JSON.stringify(user)) // fake session token
   return renderWithProviders(
     <Routes>
       <Route path="/events/:eventId" element={<EventDetailPage />} />

@@ -54,7 +54,7 @@ describe('App shell', () => {
   })
 
   it('blocks Attendees from the Organizer dashboard', async () => {
-    window.localStorage.setItem('localbini.fakeAuth', JSON.stringify(users.attendee))
+    window.localStorage.setItem('meeton.fakeAuth', JSON.stringify(users.attendee))
     renderWithProviders(<App />, { route: '/organizer', preloadedState: signedIn(users.attendee) })
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Not allowed' })).toBeInTheDocument())
   })

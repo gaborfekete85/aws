@@ -1,4 +1,4 @@
-# Localbini
+# Meeton
 
 An app for booking places at local events. Organizers publish events at a specific location and date; visitors find them by location and date and pay to book.
 

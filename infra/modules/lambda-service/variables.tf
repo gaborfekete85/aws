@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Function name; must start with localbini-<env>- (IAM boundary scoping)."
+  description = "Function name; must start with meeton-<env>- (IAM boundary scoping)."
   type        = string
 }
 

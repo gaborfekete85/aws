@@ -353,7 +353,7 @@ data "aws_iam_policy_document" "deploy" {
       "arn:aws:ssm:${var.region}:${local.account_id}:parameter/${var.project}/*",
       "arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${local.name_prefix}-*",
       "arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:rds!*",
-      # Env-prefixed buckets only, so the state bucket (localbini-tfstate-*) never matches.
+      # Env-prefixed buckets only, so the state bucket (meeton-tfstate-*) never matches.
       "arn:aws:s3:::${local.name_prefix}-dev-*",
       "arn:aws:s3:::${local.name_prefix}-dev-*/*",
       "arn:aws:s3:::${local.name_prefix}-prod-*",

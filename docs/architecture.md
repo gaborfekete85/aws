@@ -1,6 +1,6 @@
 # Architecture
 
-Localbini is an app for booking local events, built as a showcase of the stack in `spec.md`. Vocabulary follows `GLOSSARY.md`; key decisions are in `docs/adr/`.
+Meeton is an app for booking local events, built as a showcase of the stack in `spec.md`. Vocabulary follows `GLOSSARY.md`; key decisions are in `docs/adr/`.
 
 ## System overview
 

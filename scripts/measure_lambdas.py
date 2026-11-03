@@ -21,14 +21,14 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from localbini_shared.testing import http_api_event as http
+from meeton_shared.testing import http_api_event as http
 
 ROOT = Path(__file__).resolve().parents[1]
-DB = "postgresql+psycopg://localbini:localbini@host.docker.internal:5432/catalog"
+DB = "postgresql+psycopg://meeton:meeton@host.docker.internal:5432/catalog"
 DDB = "http://host.docker.internal:8000"
 
 CASES = [
-    ("health", "shared.zip", "localbini_shared.health.handle", http("GET", "/health"), {}),
+    ("health", "shared.zip", "meeton_shared.health.handle", http("GET", "/health"), {}),
     (
         "catalog-api (search)",
         "catalog.zip",
@@ -41,14 +41,14 @@ CASES = [
         "booking.zip",
         "booking.api.handle",
         http("GET", "/events/{event_id}/availability", path_params={"event_id": "x"}),
-        {"DYNAMODB_ENDPOINT_URL": DDB, "BOOKINGS_TABLE": "localbini-local-bookings"},
+        {"DYNAMODB_ENDPOINT_URL": DDB, "BOOKINGS_TABLE": "meeton-local-bookings"},
     ),
     (
         "booking-expiry (sweep)",
         "booking.zip",
         "booking.expiry.handle",
         {},
-        {"DYNAMODB_ENDPOINT_URL": DDB, "BOOKINGS_TABLE": "localbini-local-bookings"},
+        {"DYNAMODB_ENDPOINT_URL": DDB, "BOOKINGS_TABLE": "meeton-local-bookings"},
     ),
     (
         "payments-api (checkout)",

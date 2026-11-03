@@ -113,7 +113,7 @@ def test_concurrent_multi_place_holds_never_overbook(published_event) -> None:
 
 
 def test_booking_amount_and_bounds() -> None:
-    from localbini_shared.errors import ValidationError
+    from meeton_shared.errors import ValidationError
 
     booking = Booking.request(
         event_id="e",

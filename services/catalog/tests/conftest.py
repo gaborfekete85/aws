@@ -8,7 +8,7 @@ import pytest
 os.environ.setdefault("AWS_DEFAULT_REGION", "eu-central-1")
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "testing")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "testing")
-os.environ.setdefault("EVENT_BUS_NAME", "localbini-test")
+os.environ.setdefault("EVENT_BUS_NAME", "meeton-test")
 
 
 def _pg_available() -> bool:
@@ -122,7 +122,7 @@ def catalog_api(migrated_engine):
 def call(catalog_api):
     import json
 
-    from localbini_shared.testing import http_api_event
+    from meeton_shared.testing import http_api_event
 
     def _call(method, route, *, claims=None, body=None, path=None, query=None):
         event = http_api_event(
@@ -178,10 +178,10 @@ def media(catalog_api):
 
     s3 = boto3.client("s3", region_name="eu-central-1")
     s3.create_bucket(
-        Bucket="localbini-test-media",
+        Bucket="meeton-test-media",
         CreateBucketConfiguration={"LocationConstraint": "eu-central-1"},
     )
-    covers = CoverPictures("localbini-test-media", "cdn.example.net", client=s3)
+    covers = CoverPictures("meeton-test-media", "cdn.example.net", client=s3)
     original = CatalogResource.covers_provider
     CatalogResource.covers_provider = staticmethod(lambda: covers)
     try:

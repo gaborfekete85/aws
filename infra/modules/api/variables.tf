@@ -1,5 +1,5 @@
 variable "name" {
-  description = "API name, e.g. localbini-dev-api."
+  description = "API name, e.g. meeton-dev-api."
   type        = string
 }
 

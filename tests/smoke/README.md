@@ -7,7 +7,7 @@
 
 ```bash
 docker compose up -d
-export DATABASE_URL=postgresql+psycopg://localbini:localbini@localhost:5432/catalog DYNAMODB_ENDPOINT_URL=http://localhost:8000
+export DATABASE_URL=postgresql+psycopg://meeton:meeton@localhost:5432/catalog DYNAMODB_ENDPOINT_URL=http://localhost:8000
 uv run python scripts/local_api.py --port 4010 &
 uv run python tests/smoke/load.py --base-url http://localhost:4010 \
   --organizer-token local:org-load:organizer --attendee-token local:attendee-load \

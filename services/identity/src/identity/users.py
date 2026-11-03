@@ -15,8 +15,8 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 
-from localbini_shared.auth import Principal, Role, require_role
-from localbini_shared.errors import NotFoundError, ValidationError
+from meeton_shared.auth import Principal, Role, require_role
+from meeton_shared.errors import NotFoundError, ValidationError
 
 ASSIGNABLE_ROLES = frozenset({Role.ORGANIZER})
 PAGE_SIZE = 25

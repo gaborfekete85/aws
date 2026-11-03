@@ -9,9 +9,9 @@ from booking import places, repository
 from booking.domain import Booking, BookingStatus
 from booking.events import booking_confirmed, booking_requested
 from booking.holds import EventNotOpen, HoldRequest, place_hold
-from localbini_shared.auth import Principal, require_authenticated
-from localbini_shared.errors import ForbiddenError
-from localbini_shared.events import DomainEvent
+from meeton_shared.auth import Principal, require_authenticated
+from meeton_shared.errors import ForbiddenError
+from meeton_shared.events import DomainEvent
 
 
 def hold_minutes() -> int:

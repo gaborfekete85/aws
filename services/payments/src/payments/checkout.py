@@ -7,9 +7,9 @@ import time
 from datetime import datetime
 from typing import Any
 
-from localbini_shared.auth import Principal, require_authenticated
-from localbini_shared.errors import ForbiddenError
-from localbini_shared.logging import get_logger
+from meeton_shared.auth import Principal, require_authenticated
+from meeton_shared.errors import ForbiddenError
+from meeton_shared.logging import get_logger
 from payments import store
 from payments.gateway import (
     STRIPE_MIN_EXPIRY_SECONDS,

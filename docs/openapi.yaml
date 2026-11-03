@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Localbini API
+  title: Meeton API
   version: 0.1.0
   description: |
     HTTP API Gateway in front of the Catalog, Booking, Payments and Identity Lambdas.

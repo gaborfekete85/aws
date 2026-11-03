@@ -107,7 +107,7 @@ test('attendee books a paid Event with a Stripe test card @dev', async ({ browse
   await page.getByLabel('Card number').fill('4242 4242 4242 4242')
   await page.getByLabel('Expiration').fill('12 / 34')
   await page.getByLabel('CVC').fill('123')
-  await page.getByLabel(/Cardholder name|Name on card/).fill('Localbini E2E')
+  await page.getByLabel(/Cardholder name|Name on card/).fill('Meeton E2E')
   const country = page.getByLabel(/Country or region/)
   if (await country.isVisible()) await country.selectOption('CH')
   await page.getByTestId('hosted-payment-submit-button').click()

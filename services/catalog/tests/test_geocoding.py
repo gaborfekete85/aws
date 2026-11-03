@@ -13,7 +13,7 @@ from catalog.geocoding import (
     NominatimGeocoder,
 )
 from catalog.locations import LocationInput, location_changed, resolve_location
-from localbini_shared.errors import ValidationError
+from meeton_shared.errors import ValidationError
 
 URL = "https://geo.test/search"
 MATCH = re.compile(r"^https://geo\.test/search\?.*$")

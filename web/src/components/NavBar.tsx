@@ -12,7 +12,7 @@ export function NavBar() {
   return (
     <header className="nav">
       <Link to="/" className="brand">
-        Localbini
+        Meeton
       </Link>
       <nav aria-label="Main">
         <NavLink to="/">Find Events</NavLink>

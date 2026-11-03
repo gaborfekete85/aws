@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from localbini_shared.auth import Principal
-from localbini_shared.errors import ForbiddenError
+from meeton_shared.auth import Principal
+from meeton_shared.errors import ForbiddenError
 from payments import store
 from payments.checkout import (
     checkout_for,
@@ -91,7 +91,7 @@ def test_web_app_fetches_url_only_for_own_booking(
 
 
 def test_checkout_endpoint_returns_202_then_url(payments_table, gateway, booking_requested) -> None:
-    from localbini_shared.testing import http_api_event
+    from meeton_shared.testing import http_api_event
     from payments.api import handle
 
     data = booking_requested()

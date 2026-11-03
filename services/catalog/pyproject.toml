@@ -1,9 +1,9 @@
 [project]
-name = "localbini-catalog"
+name = "meeton-catalog"
 version = "0.1.0"
 requires-python = ">=3.13"
 # aiohttp <3.13: aioresponses 0.7.9 (test mocks) does not support 3.13+ ClientResponse yet.
-dependencies = ["localbini-shared", "sqlalchemy>=2.0.36", "psycopg[binary]>=3.2", "alembic>=1.14", "geoalchemy2>=0.16", "aiohttp>=3.12,<3.13"]
+dependencies = ["meeton-shared", "sqlalchemy>=2.0.36", "psycopg[binary]>=3.2", "alembic>=1.14", "geoalchemy2>=0.16", "aiohttp>=3.12,<3.13"]
 
 [build-system]
 requires = ["hatchling"]

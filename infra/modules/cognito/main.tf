@@ -31,8 +31,8 @@ resource "aws_cognito_user_pool" "this" {
 
   verification_message_template {
     default_email_option = "CONFIRM_WITH_CODE"
-    email_subject        = "Your Localbini verification code"
-    email_message        = "Your Localbini verification code is {####}"
+    email_subject        = "Your Meeton verification code"
+    email_message        = "Your Meeton verification code is {####}"
   }
 
   admin_create_user_config {

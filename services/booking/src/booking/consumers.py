@@ -11,8 +11,8 @@ from collections.abc import Callable
 from typing import Any
 
 from booking import lifecycle, places
-from localbini_shared.consumers import make_event_handler
-from localbini_shared.events import DomainEvent, EventPublisher
+from meeton_shared.consumers import make_event_handler
+from meeton_shared.events import DomainEvent, EventPublisher
 
 
 def on_catalog_event(event: DomainEvent) -> None:

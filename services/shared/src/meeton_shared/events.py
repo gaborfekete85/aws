@@ -21,14 +21,14 @@ import boto3
 from lbz.events.api import EventAPI
 from lbz.events.event import Event as LbzEvent
 
-from localbini_shared.logging import current_correlation_id, get_logger
+from meeton_shared.logging import current_correlation_id, get_logger
 
 logger = get_logger(__name__)
 
 os.environ.setdefault("EVENTS_BUS_NAME", os.environ.get("EVENT_BUS_NAME", ""))
-os.environ.setdefault("AWS_LAMBDA_FUNCTION_NAME", os.environ.get("SERVICE_NAME", "localbini"))
+os.environ.setdefault("AWS_LAMBDA_FUNCTION_NAME", os.environ.get("SERVICE_NAME", "meeton"))
 
-SOURCE_PREFIX = "localbini"
+SOURCE_PREFIX = "meeton"
 
 
 def _now() -> str:

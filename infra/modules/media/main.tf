@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Prefix, e.g. localbini-dev (bucket becomes <name>-media)."
+  description = "Prefix, e.g. meeton-dev (bucket becomes <name>-media)."
   type        = string
 }
 

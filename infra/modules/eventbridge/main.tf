@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Bus name, e.g. localbini-dev."
+  description = "Bus name, e.g. meeton-dev."
   type        = string
 }
 

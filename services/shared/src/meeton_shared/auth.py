@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
-from localbini_shared.errors import ForbiddenError, UnauthenticatedError
+from meeton_shared.errors import ForbiddenError, UnauthenticatedError
 
 
 class Role(StrEnum):

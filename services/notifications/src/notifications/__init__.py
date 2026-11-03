@@ -1,1 +1,1 @@
-"""Localbini notifications service."""
+"""Meeton notifications service."""
