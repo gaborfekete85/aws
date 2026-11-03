@@ -68,3 +68,14 @@ variable "hold_minutes" {
   type        = number
   default     = 15
 }
+
+variable "sender_email" {
+  description = "SES identity Localbini sends email from."
+  type        = string
+}
+
+variable "ses_max_send_rate" {
+  description = "Emails per second Notifications may send (SES sandbox: 1)."
+  type        = number
+  default     = 1
+}

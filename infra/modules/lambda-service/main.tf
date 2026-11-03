@@ -193,3 +193,24 @@ resource "aws_iam_role_policy" "dlq" {
   role   = aws_iam_role.this.id
   policy = data.aws_iam_policy_document.dlq[0].json
 }
+
+# --- SQS source ---------------------------------------------------------------
+resource "aws_iam_role_policy_attachment" "sqs" {
+  count      = var.sqs_source == null ? 0 : 1
+  role       = aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+}
+
+resource "aws_lambda_event_source_mapping" "sqs" {
+  count                   = var.sqs_source == null ? 0 : 1
+  event_source_arn        = var.sqs_source.queue_arn
+  function_name           = aws_lambda_function.this.arn
+  batch_size              = var.sqs_source.batch_size
+  function_response_types = ["ReportBatchItemFailures"] # only failed records are retried
+
+  scaling_config {
+    maximum_concurrency = var.sqs_source.max_concurrency
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.sqs]
+}

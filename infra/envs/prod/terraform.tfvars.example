@@ -1,0 +1,3 @@
+# Copy to terraform.tfvars (gitignored) for local plans/applies.
+alert_emails = ["you@example.com"]
+sender_email = "you@example.com"

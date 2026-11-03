@@ -9,6 +9,11 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  # Personal addresses live in repository variables, never in the repo.
+  TF_VAR_alert_emails: ${{ vars.ALERT_EMAILS }}
+  TF_VAR_sender_email: ${{ vars.SENDER_EMAIL }}
+
 jobs:
   build:
     name: Build Lambda packages

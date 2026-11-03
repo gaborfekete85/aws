@@ -13,6 +13,10 @@ permissions:
   id-token: write        # OIDC to AWS (plan role)
   pull-requests: write   # post the plan
 
+env:
+  TF_VAR_alert_emails: ${{ vars.ALERT_EMAILS }}
+  TF_VAR_sender_email: ${{ vars.SENDER_EMAIL }}
+
 concurrency:
   group: tf-plan-${{ github.ref }}
   cancel-in-progress: true

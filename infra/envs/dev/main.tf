@@ -6,6 +6,7 @@ module "stack" {
   interface_endpoint_az_count = 1
   budget_usd                  = 40
   alert_emails                = var.alert_emails
+  sender_email                = var.sender_email
   web_urls                    = ["http://localhost:5173"]
   lambda_packages_dir         = "${path.root}/../../../dist"
 }

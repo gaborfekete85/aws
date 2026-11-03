@@ -11,7 +11,11 @@ variable "owner" {
 }
 
 variable "alert_emails" {
-  description = "Budget alert recipients."
+  description = "Budget alert recipients (set via TF_VAR_alert_emails or a gitignored terraform.tfvars)."
   type        = list(string)
-  default     = ["gabor.fekete85@gmail.com"]
+}
+
+variable "sender_email" {
+  description = "Verified SES identity Localbini sends from (TF_VAR_sender_email)."
+  type        = string
 }

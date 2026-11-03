@@ -123,3 +123,13 @@ variable "async_max_retries" {
   type        = number
   default     = 2
 }
+
+variable "sqs_source" {
+  description = "Consume an SQS queue (partial-batch failures enabled)."
+  type = object({
+    queue_arn       = string
+    batch_size      = optional(number, 10)
+    max_concurrency = optional(number, 2)
+  })
+  default = null
+}
