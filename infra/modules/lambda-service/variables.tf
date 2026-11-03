@@ -111,3 +111,15 @@ variable "schedule_expression" {
   type        = string
   default     = null
 }
+
+variable "async_failure_queue_arn" {
+  description = "SQS queue receiving events whose async invocation failed after retries (DLQ)."
+  type        = string
+  default     = null
+}
+
+variable "async_max_retries" {
+  description = "Lambda retries for async (EventBridge) invocations."
+  type        = number
+  default     = 2
+}
