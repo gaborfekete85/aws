@@ -43,3 +43,37 @@ module "catalog_migrate" {
   policy_json              = data.aws_iam_policy_document.catalog_db_secret.json
   vpc                      = local.catalog_vpc
 }
+
+data "aws_iam_policy_document" "catalog_api" {
+  source_policy_documents = [data.aws_iam_policy_document.catalog_db_secret.json]
+  statement {
+    actions   = ["events:PutEvents"]
+    resources = [module.eventbridge.bus_arn]
+  }
+}
+
+module "catalog_api" {
+  source                   = "../lambda-service"
+  name                     = "${local.name}-catalog-api"
+  description              = "Catalog: Organizer Event management and public Event search"
+  package_path             = "${var.lambda_packages_dir}/catalog.zip"
+  handler                  = "catalog.api.handle"
+  timeout                  = 15 # includes geocoding with retries
+  memory_size              = 512
+  permissions_boundary_arn = local.boundary_arn
+  log_retention_days       = var.log_retention_days
+  environment = merge(local.common_env, local.catalog_db_env, {
+    GEOCODER_URL = "https://nominatim.openstreetmap.org/search"
+  })
+  policy_json = data.aws_iam_policy_document.catalog_api.json
+  vpc         = local.catalog_vpc
+  api         = local.api
+  routes = [
+    { route_key = "POST /events" },
+    { route_key = "PATCH /events/{event_id}" },
+    { route_key = "POST /events/{event_id}/publish" },
+    { route_key = "POST /events/{event_id}/cancel" },
+    { route_key = "GET /organizer/events" },
+    { route_key = "GET /organizer/events/{event_id}" },
+  ]
+}

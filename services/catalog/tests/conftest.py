@@ -71,3 +71,97 @@ def make_event():
         return Event(**values)
 
     return factory
+
+
+ORGANIZER = {"sub": "org-1", "email": "org@example.com", "cognito:groups": "[organizer]"}
+OTHER_ORGANIZER = {"sub": "org-2", "cognito:groups": "[organizer]"}
+ADMIN = {"sub": "admin-1", "cognito:groups": "[admin]"}
+ATTENDEE = {"sub": "user-1", "email": "user@example.com"}
+
+
+class StubGeocoder:
+    """Resolves every address to central Zürich, or fails for 'Atlantis'."""
+
+    async def geocode(self, address: str, city: str):
+        from catalog.domain import GeoPoint
+        from catalog.geocoding import AddressNotFound, GeocodeResult
+
+        if city == "Atlantis":
+            raise AddressNotFound(
+                f"We could not find '{address}, {city}'", details={"field": "address"}
+            )
+        return GeocodeResult(GeoPoint(47.3769, 8.5417), f"{address}, {city}")
+
+
+@pytest.fixture
+def catalog_api(migrated_engine):
+    """The Catalog Lambda handler wired to the test DB, a stub geocoder and a moto bus."""
+    from catalog.api import CatalogResource, handle
+    from moto import mock_aws
+    from sqlalchemy import text
+    from sqlalchemy.orm import sessionmaker
+
+    factory = sessionmaker(bind=migrated_engine, expire_on_commit=False)
+    original = (CatalogResource.session_provider, CatalogResource.geocoder_provider)
+    CatalogResource.session_provider = staticmethod(factory)
+    CatalogResource.geocoder_provider = staticmethod(StubGeocoder)
+    with mock_aws():
+        import boto3
+
+        boto3.client("events").create_event_bus(Name=os.environ["EVENT_BUS_NAME"])
+        try:
+            yield handle
+        finally:
+            CatalogResource.session_provider, CatalogResource.geocoder_provider = original
+            with migrated_engine.begin() as conn:
+                conn.execute(text("truncate events, locations cascade"))
+
+
+@pytest.fixture
+def call(catalog_api):
+    import json
+
+    from localbini_shared.testing import http_api_event
+
+    def _call(method, route, *, claims=None, body=None, path=None, query=None):
+        event = http_api_event(
+            method, route, path_params=path, body=body, claims=claims, query=query
+        )
+        result = catalog_api(event, None)
+        return result["statusCode"], json.loads(result["body"]) if result["body"] else None
+
+    return _call
+
+
+@pytest.fixture
+def event_body():
+    from datetime import UTC, datetime, timedelta
+
+    starts = (datetime.now(UTC) + timedelta(days=14)).replace(microsecond=0)
+
+    def factory(**overrides):
+        body = {
+            "title": "Sunset jazz on the lake",
+            "description": "Live quartet.",
+            "important_information": "Bring a blanket.",
+            "starts_at": starts.isoformat(),
+            "ends_at": (starts + timedelta(hours=2)).isoformat(),
+            "places": 40,
+            "price_cents": 2500,
+            "currency": "CHF",
+            "location": {"name": "Seebad Enge", "address": "Mythenquai 9", "city": "Zürich"},
+        }
+        body.update(overrides)
+        return body
+
+    return factory
+
+
+@pytest.fixture
+def sent_events():
+    from lbz.events.api import EventAPI
+
+    def _sent():
+        return [(e.type, e.data) for e in EventAPI().sent_events]
+
+    return _sent
