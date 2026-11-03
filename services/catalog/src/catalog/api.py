@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import date, datetime, time
 from typing import Any, ClassVar
+from zoneinfo import ZoneInfo
 
 from lbz.response import Response
 from lbz.router import add_route
@@ -17,6 +19,7 @@ from catalog.domain import EventStatus
 from catalog.geocoding import Geocoder, NominatimGeocoder
 from catalog.repository import EventRepository
 from catalog.schemas import EventCreate, EventUpdate, event_out
+from catalog.search import SearchPage, SearchQuery, get_public, search_published
 from catalog.service import OrganizerEvents, parse_event_id
 
 
@@ -97,6 +100,89 @@ class CatalogResource(ApiResource):
     def get_my_event(self, event_id: str) -> Response:
         eid = parse_event_id(event_id)
         return self._run(lambda s: s.get(self.principal, eid))
+
+    # --- public endpoints (no JWT) --------------------------------------------
+    @add_route("/events", method="GET")
+    @domain_errors
+    def search_events(self) -> Response:
+        query = self._search_query()
+        session = type(self).session_provider()
+        try:
+            page = search_published(session, query)
+        finally:
+            session.close()
+        return Response(self._render_page(page))
+
+    @add_route("/events/{event_id}", method="GET")
+    @domain_errors
+    def get_event(self, event_id: str) -> Response:
+        eid = parse_event_id(event_id)
+        session = type(self).session_provider()
+        try:
+            event = get_public(session, EventRepository(session).get(eid))
+        finally:
+            session.close()
+        return Response(event_out(event, type(self).cover_url_for(event.cover_picture_key)))
+
+    def _search_query(self) -> SearchQuery:
+        return SearchQuery(
+            lat=self._number("lat", float),
+            lng=self._number("lng", float),
+            radius_km=_default(self._number("radius_km", float), 25.0),
+            starts_from=_parse_bound(self.query("from"), "from", end_of_day=False),
+            starts_to=_parse_bound(self.query("to"), "to", end_of_day=True),
+            limit=int(_default(self._number("limit", int), 20)),
+            offset=int(_default(self._number("offset", int), 0)),
+        )
+
+    def _number(self, name: str, kind: type[float] | type[int]) -> float | None:
+        raw = self.query(name)
+        if raw is None or raw == "":
+            return None
+        try:
+            return kind(raw)
+        except ValueError as error:
+            raise ValidationError(f"{name} must be a number", details={"field": name}) from error
+
+    def _render_page(self, page: SearchPage) -> dict[str, Any]:
+        cover = type(self).cover_url_for
+        items = []
+        for hit in page.hits:
+            item = event_out(hit.event, cover(hit.event.cover_picture_key))
+            item["distance_km"] = hit.distance_km
+            items.append(item)
+        return {
+            "items": items,
+            "count": page.total,
+            "limit": page.limit,
+            "offset": page.offset,
+            "next_offset": page.next_offset,
+        }
+
+
+SEARCH_TZ = ZoneInfo("Europe/Zurich")
+
+
+def _default(value: float | None, default: float) -> float:
+    return default if value is None else value
+
+
+def _parse_bound(raw: str | None, name: str, *, end_of_day: bool) -> datetime | None:
+    """Accept a date (2026-11-03, local day boundaries) or a full ISO-8601 datetime."""
+    if not raw:
+        return None
+    try:
+        if len(raw) == 10:
+            day = date.fromisoformat(raw)
+            return datetime.combine(day, time.max if end_of_day else time.min, SEARCH_TZ)
+        value = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise ValidationError(
+            f"{name} must be a date or ISO datetime", details={"field": name}
+        ) from error
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=SEARCH_TZ)
+    return value
 
 
 handle = make_http_handler(CatalogResource, "catalog")

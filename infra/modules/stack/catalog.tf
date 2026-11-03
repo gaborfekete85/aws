@@ -75,5 +75,8 @@ module "catalog_api" {
     { route_key = "POST /events/{event_id}/cancel" },
     { route_key = "GET /organizer/events" },
     { route_key = "GET /organizer/events/{event_id}" },
+    # Visitors search and read Events without logging in.
+    { route_key = "GET /events", public = true },
+    { route_key = "GET /events/{event_id}", public = true },
   ]
 }
