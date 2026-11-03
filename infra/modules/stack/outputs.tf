@@ -27,3 +27,8 @@ output "hosted_ui_domain" {
   description = "Cognito Hosted UI domain."
   value       = module.cognito.hosted_ui_domain
 }
+
+output "catalog_migrate_function" {
+  description = "Lambda that runs Catalog migrations."
+  value       = module.catalog_migrate.function_name
+}

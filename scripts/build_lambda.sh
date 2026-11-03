@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Build a Lambda deployment zip for one service (arm64, Python 3.13).
 #   scripts/build_lambda.sh <service>      -> dist/<service>.zip
-# Works from macOS or Linux: dependencies are resolved for manylinux aarch64.
+# Works from macOS or Linux: wheels are resolved for manylinux_2_28 aarch64
+# (python3.13 Lambda runs Amazon Linux 2023, glibc 2.34).
 set -euo pipefail
 
 service=${1:?usage: build_lambda.sh <shared|catalog|booking|payments|notifications>}
@@ -17,7 +18,7 @@ uv export --project "$root" --package "$pkg" --no-dev --no-hashes --frozen --no-
   --format requirements-txt -o "$work/requirements.txt" >/dev/null
 
 uv pip install --quiet --target "$work/pkg" \
-  --python-platform aarch64-manylinux2014 --python-version 3.13 --only-binary :all: \
+  --python-platform aarch64-manylinux_2_28 --python-version 3.13 --only-binary :all: \
   -r "$work/requirements.txt"
 
 # Workspace packages (shared + the service itself) are pure Python: copy sources.
