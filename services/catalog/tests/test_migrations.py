@@ -11,6 +11,7 @@ def test_migration_chain_is_linear_and_starts_with_postgis() -> None:
     assert len(heads) == 1, f"multiple heads: {heads}"
     base = next(iter(script.get_bases()))
     assert base == "0001"
+    assert script.get_current_head() == heads[0]
 
 
 @pytest.mark.integration

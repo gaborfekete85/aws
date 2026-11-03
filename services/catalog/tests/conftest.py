@@ -25,3 +25,49 @@ def migrated_engine() -> Iterator[object]:
 
     upgrade()
     yield get_engine()
+
+
+@pytest.fixture
+def session(migrated_engine):
+    """A session inside a transaction that is rolled back after each test."""
+    from sqlalchemy.orm import Session
+
+    connection = migrated_engine.connect()
+    transaction = connection.begin()
+    db_session = Session(bind=connection, join_transaction_mode="create_savepoint")
+    try:
+        yield db_session
+    finally:
+        db_session.close()
+        transaction.rollback()
+        connection.close()
+
+
+@pytest.fixture
+def make_event():
+    from datetime import UTC, datetime, timedelta
+
+    from catalog.domain import Event, GeoPoint, Location, Money
+
+    def factory(**overrides):
+        starts = overrides.pop("starts_at", datetime.now(UTC) + timedelta(days=7))
+        values = {
+            "organizer_id": "org-1",
+            "title": "Sunset jazz on the lake",
+            "description": "Live quartet.",
+            "important_information": "Bring a blanket.",
+            "starts_at": starts,
+            "ends_at": starts + timedelta(hours=2),
+            "places": 40,
+            "price": Money(2500, "CHF"),
+            "location": Location(
+                name="Seebad Enge",
+                address="Mythenquai 9",
+                city="Zürich",
+                point=GeoPoint(47.3601, 8.5354),
+            ),
+        }
+        values.update(overrides)
+        return Event(**values)
+
+    return factory
