@@ -55,6 +55,7 @@ resource "aws_sqs_queue" "booking_dlq" {
 locals {
   booking_env = merge(local.common_env, {
     BOOKINGS_TABLE = aws_dynamodb_table.bookings.name
+    HOLD_MINUTES   = tostring(var.hold_minutes)
   })
 }
 
@@ -92,4 +93,24 @@ module "booking_consumer" {
       "detail-type" = ["EventPublished", "EventUpdated", "EventCancelled"]
     })
   }
+}
+
+module "booking_api" {
+  source                   = "../lambda-service"
+  name                     = "${local.name}-booking-api"
+  description              = "Booking: request Bookings (Holds), list my Bookings, availability"
+  package_path             = "${var.lambda_packages_dir}/booking.zip"
+  handler                  = "booking.api.handle"
+  memory_size              = 512
+  permissions_boundary_arn = local.boundary_arn
+  log_retention_days       = var.log_retention_days
+  environment              = local.booking_env
+  policy_json              = data.aws_iam_policy_document.booking_table.json
+  api                      = local.api
+  routes = [
+    { route_key = "POST /events/{event_id}/bookings" },
+    { route_key = "GET /me/bookings" },
+    { route_key = "GET /bookings/{booking_id}" },
+    { route_key = "GET /events/{event_id}/availability", public = true },
+  ]
 }

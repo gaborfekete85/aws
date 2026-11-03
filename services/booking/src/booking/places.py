@@ -6,7 +6,8 @@ the counter Holds decrement with a conditional write.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import json
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
@@ -32,6 +33,7 @@ class EventPlaces:
     status: str
     starts_at: datetime
     source_updated_at: str
+    details: dict[str, Any] = field(default_factory=dict)
 
     @property
     def is_free(self) -> bool:
@@ -53,6 +55,7 @@ def _from_item(item: dict[str, Any]) -> EventPlaces:
         status=item["status"]["S"],
         starts_at=datetime.fromisoformat(item["starts_at"]["S"]),
         source_updated_at=item["source_updated_at"]["S"],
+        details=json.loads(item.get("details", {}).get("S", "{}")),
     )
 
 
@@ -78,6 +81,17 @@ def find(event_id: str) -> EventPlaces | None:
         return None
 
 
+def _details(data: dict[str, Any]) -> dict[str, Any]:
+    """What Attendee emails need about the Event (date, Location, Important information)."""
+    return {
+        "title": data.get("title", ""),
+        "starts_at": data.get("starts_at"),
+        "ends_at": data.get("ends_at"),
+        "location": data.get("location") or {},
+        "important_information": data.get("important_information", ""),
+    }
+
+
 def apply_snapshot(data: dict[str, Any], occurred_at: str) -> None:
     """Upsert from EventPublished / EventUpdated / EventCancelled.
 
@@ -101,6 +115,7 @@ def apply_snapshot(data: dict[str, Any], occurred_at: str) -> None:
             ":starts": {"S": data["starts_at"]},
             ":ts": {"S": occurred_at},
             ":event_id": {"S": event_id},
+            ":details": {"S": json.dumps(_details(data))},
         }
         key = {"pk": {"S": event_pk(event_id)}, "sk": {"S": PLACES_SK}}
         try:
@@ -119,6 +134,7 @@ def apply_snapshot(data: dict[str, Any], occurred_at: str) -> None:
                         "status": values[":status"],
                         "starts_at": values[":starts"],
                         "source_updated_at": values[":ts"],
+                        "details": values[":details"],
                     },
                     ConditionExpression="attribute_not_exists(pk)",
                 )
@@ -132,7 +148,7 @@ def apply_snapshot(data: dict[str, Any], occurred_at: str) -> None:
                         "SET title = :title, places_total = :total,"
                         " places_left = places_left + :delta, price_cents = :price,"
                         " currency = :currency, #status = :status, starts_at = :starts,"
-                        " source_updated_at = :ts"
+                        " source_updated_at = :ts, details = :details"
                     ),
                     ConditionExpression="places_total = :old_total AND source_updated_at < :ts",
                     ExpressionAttributeNames={"#status": "status"},

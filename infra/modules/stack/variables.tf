@@ -62,3 +62,9 @@ variable "enable_google_login" {
   type        = bool
   default     = true
 }
+
+variable "hold_minutes" {
+  description = "How long a Hold keeps Places for an Attendee in Checkout."
+  type        = number
+  default     = 15
+}

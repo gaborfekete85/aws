@@ -73,3 +73,33 @@ def published_event(bookings_table):
         return event_id
 
     return _seed
+
+
+ATTENDEE = {"sub": "user-1", "email": "ada@example.com"}
+OTHER_ATTENDEE = {"sub": "user-2", "email": "bob@example.com"}
+ADMIN = {"sub": "admin-1", "cognito:groups": "[admin]"}
+
+
+@pytest.fixture
+def bus():
+    from localbini_shared.testing import capture_lbz_events, release_lbz_events
+
+    recorder = capture_lbz_events()
+    yield recorder
+    release_lbz_events()
+
+
+@pytest.fixture
+def call(bookings_table, bus):
+    import json
+
+    from booking.api import handle
+    from localbini_shared.testing import http_api_event
+
+    def _call(method, route, *, claims=None, body=None, path=None):
+        result = handle(
+            http_api_event(method, route, path_params=path, body=body, claims=claims), None
+        )
+        return result["statusCode"], json.loads(result["body"]) if result["body"] else None
+
+    return _call

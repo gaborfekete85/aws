@@ -61,3 +61,37 @@ def eventbridge_event(detail: dict[str, Any], detail_type: str) -> dict[str, Any
         "resources": [],
         "detail": detail,
     }
+
+
+class RecordingEventBridge:
+    """Stands in for the EventBridge client; records every PutEvents entry."""
+
+    def __init__(self) -> None:
+        self.entries: list[dict[str, Any]] = []
+
+    def put_events(self, Entries: list[dict[str, Any]]) -> dict[str, Any]:
+        self.entries.extend(Entries)
+        return {"FailedEntryCount": 0, "Entries": [{"EventId": str(uuid.uuid4())} for _ in Entries]}
+
+    @property
+    def events(self) -> list[tuple[str, dict[str, Any]]]:
+        """(detail-type, envelope) pairs in publish order."""
+        return [(e["DetailType"], json.loads(e["Detail"])) for e in self.entries]
+
+    def of_type(self, type_: str) -> list[dict[str, Any]]:
+        return [detail["data"] for t, detail in self.events if t == type_]
+
+
+def capture_lbz_events() -> RecordingEventBridge:
+    """Route lbz's EventAPI (HTTP handlers) to a recorder. Undo with release_lbz_events()."""
+    from lbz.aws_boto3 import client
+
+    recorder = RecordingEventBridge()
+    client.__dict__["eventbridge"] = recorder
+    return recorder
+
+
+def release_lbz_events() -> None:
+    from lbz.aws_boto3 import client
+
+    client.__dict__.pop("eventbridge", None)

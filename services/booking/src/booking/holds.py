@@ -47,10 +47,26 @@ def hold_item(req: HoldRequest) -> dict[str, Any]:
     }
 
 
-def place_hold(req: HoldRequest, booking_item: dict[str, Any]) -> None:
-    """Atomically take ``req.places`` and record the Hold + Booking, or raise."""
+def place_hold(req: HoldRequest, booking_item: dict[str, Any], *, with_hold: bool = True) -> None:
+    """Atomically take ``req.places`` and record the Hold + Booking, or raise.
+
+    ``with_hold=False`` (free Events) takes the places for good: no Hold to expire.
+    """
     if req.places < 1:
         raise ValueError("places must be >= 1")
+    hold_put: list[dict[str, Any]] = (
+        [
+            {
+                "Put": {
+                    "TableName": table_name(),
+                    "Item": hold_item(req),
+                    "ConditionExpression": "attribute_not_exists(pk)",
+                }
+            }
+        ]
+        if with_hold
+        else []
+    )
     try:
         client().transact_write_items(
             TransactItems=[
@@ -67,13 +83,7 @@ def place_hold(req: HoldRequest, booking_item: dict[str, Any]) -> None:
                         },
                     }
                 },
-                {
-                    "Put": {
-                        "TableName": table_name(),
-                        "Item": hold_item(req),
-                        "ConditionExpression": "attribute_not_exists(pk)",
-                    }
-                },
+                *hold_put,
                 {
                     "Put": {
                         "TableName": table_name(),
