@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { BookingPanel } from '../bookings/BookingPanel'
 import { CoverPicture } from './EventCard'
 import { useGetAvailabilityQuery, useGetEventQuery } from './eventsApi'
 import { formatPrice, formatWhen } from './format'
 
 /** Description, Important information, Location, date, price and places left. */
-export function EventDetailPage({ bookingPanel }: { bookingPanel?: ReactNode }) {
+export function EventDetailPage() {
   const { eventId = '' } = useParams()
   const { data: event, isLoading, error } = useGetEventQuery(eventId)
   const { data: availability } = useGetAvailabilityQuery(eventId, { skip: !event || event.status !== 'published' })
@@ -56,7 +56,7 @@ export function EventDetailPage({ bookingPanel }: { bookingPanel?: ReactNode }) 
           </>
         )}
       </dl>
-      {event.status === 'published' && bookingPanel}
+      {event.status === 'published' && <BookingPanel eventId={event.id} availability={availability} />}
       {event.description && (
         <section>
           <h2>About</h2>

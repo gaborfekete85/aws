@@ -4,6 +4,8 @@ import { useAppDispatch } from './app/hooks'
 import { loadSession } from './auth/authSlice'
 import { NavBar } from './components/NavBar'
 import { AdminPage } from './features/admin/AdminPage'
+import { CheckoutReturnPage } from './features/bookings/CheckoutReturnPage'
+import { MyBookingsPage } from './features/bookings/MyBookingsPage'
 import { EventDetailPage } from './features/events/EventDetailPage'
 import { SearchPage } from './features/events/SearchPage'
 import { DashboardPage } from './features/organizer/DashboardPage'
@@ -34,7 +36,23 @@ export default function App() {
             path="/me/bookings"
             element={
               <RequireRole>
-                <Placeholder title="My Bookings" />
+                <MyBookingsPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/checkout/success"
+            element={
+              <RequireRole>
+                <CheckoutReturnPage outcome="success" />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/checkout/cancel"
+            element={
+              <RequireRole>
+                <CheckoutReturnPage outcome="cancel" />
               </RequireRole>
             }
           />
