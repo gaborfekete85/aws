@@ -66,16 +66,25 @@ resource "aws_instance" "nat" {
     volume_size = 8
   }
 
-  user_data = <<-EOT
+  # User data only runs on first boot: replace the instance when the script changes.
+  user_data_replace_on_change = true
+  user_data                   = <<-EOT
     #!/bin/bash
     set -euo pipefail
-    dnf install -y iptables-services
+    # A t4g.nano has 512 MB; dnf's repo metadata alone got it OOM-killed (#41).
+    fallocate -l 1G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    for attempt in 1 2 3; do
+      dnf install -y --setopt=install_weak_deps=False iptables-services && break
+      [ "$attempt" = 3 ] && exit 1
+      sleep 10
+    done
     echo 'net.ipv4.ip_forward = 1' > /etc/sysctl.d/90-nat.conf
     sysctl --system
     IFACE=$(ip route | awk '/default/ {print $5; exit}')
     iptables -t nat -A POSTROUTING -o "$IFACE" -s ${var.cidr_block} -j MASQUERADE
     iptables -F FORWARD
-    service iptables save
+    iptables-save > /etc/sysconfig/iptables # what `service iptables save` does, without initscripts
     systemctl enable --now iptables
   EOT
 
