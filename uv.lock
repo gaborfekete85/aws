@@ -1016,10 +1016,14 @@ version = "0.1.0"
 source = { editable = "services/payments" }
 dependencies = [
     { name = "localbini-shared" },
+    { name = "stripe" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "localbini-shared", editable = "services/shared" }]
+requires-dist = [
+    { name = "localbini-shared", editable = "services/shared" },
+    { name = "stripe", specifier = ">=11" },
+]
 
 [[package]]
 name = "localbini-shared"
@@ -2143,6 +2147,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/66/25/2182431a4955adfeab69a89e7e4e81eaabbfbf1846ff8634b0f9448fd6cd/sqlalchemy-2.1.6-cp315-cp315t-win_amd64.whl", hash = "sha256:a053a9d9c9ccc9b72d90ecdcbabcbe57446defc7e8c52fc9978188f78742ac19", size = 2510428, upload-time = "2026-10-21T18:11:59.23Z" },
     { url = "https://files.pythonhosted.org/packages/b3/69/e290384d311e6e2c495734673bdbd2e358dc6725e7c1525326eb8e34af8d/sqlalchemy-2.1.6-cp315-cp315t-win_arm64.whl", hash = "sha256:61dc3fa488208a2f03e0e25ad32950dc024545291acc7348f2e550ea1bc5abb4", size = 2429115, upload-time = "2026-10-21T18:48:28.987Z" },
     { url = "https://files.pythonhosted.org/packages/c1/69/c75534e336b06b3fd3f76de73d89736510800e60c77c58d4e4ce18389018/sqlalchemy-2.1.6-py3-none-any.whl", hash = "sha256:106878cf3795cd3d357e2e858609f9e44f20f19b2d8e48a3532bef3f90b03fbe", size = 2063055, upload-time = "2026-10-21T18:42:10.234Z" },
+]
+
+[[package]]
+name = "stripe"
+version = "16.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/08/2d/f105dfd56ada798dc698a13a992d9153802cbdabf7a6bab8084c0c187e3f/stripe-16.1.0.tar.gz", hash = "sha256:21e72b6779b8cff337ca8d2b8d30138f2d68f6a8d739701076f06a418ad75b8c", size = 1624677, upload-time = "2026-10-29T19:53:41.12Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/94/50/4ecff21d2ff5f867aa05c48b5f4338c80bae51d9dcbd943b373cb52ca71c/stripe-16.1.0-py3-none-any.whl", hash = "sha256:3798e07a0603c8923710414cd1942ae847ed43cebbf34c3258417c189711ea70", size = 2645741, upload-time = "2026-10-29T19:53:39.094Z" },
 ]
 
 [[package]]
