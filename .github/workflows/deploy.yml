@@ -61,6 +61,9 @@ jobs:
           terraform apply -input=false -auto-approve -lock-timeout=300s
       - name: Run Catalog migrations (in-VPC Lambda)
         run: scripts/run_migrations.sh dev
+      - uses: oven-sh/setup-bun@v2
+      - name: Build and publish web/ to Amplify Hosting
+        run: scripts/deploy_web.sh dev
       - id: out
         working-directory: infra/envs/dev
         run: echo "api_endpoint=$(terraform output -raw api_endpoint)" >> "$GITHUB_OUTPUT"
@@ -101,3 +104,6 @@ jobs:
           terraform apply -input=false -auto-approve -lock-timeout=300s
       - name: Run Catalog migrations (in-VPC Lambda)
         run: scripts/run_migrations.sh prod
+      - uses: oven-sh/setup-bun@v2
+      - name: Build and publish web/ to Amplify Hosting
+        run: scripts/deploy_web.sh prod

@@ -47,7 +47,7 @@ module "catalog_migrate" {
 module "media" {
   source             = "../media"
   name               = local.name
-  cors_allow_origins = var.web_urls
+  cors_allow_origins = local.web_origins
 }
 
 data "aws_iam_policy_document" "catalog_api" {

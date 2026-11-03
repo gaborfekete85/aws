@@ -1,3 +1,54 @@
-:root { font-family: system-ui, sans-serif; color-scheme: light dark; }
-body { margin: 0; }
-main { max-width: 960px; margin: 0 auto; padding: 1rem; }
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --text: #1c1917;
+  --muted: #78716c;
+  --border: #e7e5e4;
+  --accent: #0f766e;
+  --accent-text: #ffffff;
+  --error: #b91c1c;
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1917;
+    --surface: #292524;
+    --text: #f5f5f4;
+    --muted: #a8a29e;
+    --border: #44403c;
+    --accent: #2dd4bf;
+    --accent-text: #042f2e;
+    --error: #f87171;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+main { max-width: 1040px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+a { color: var(--accent); }
+h1 { font-size: 1.75rem; margin: 0.5rem 0 1rem; }
+.muted { color: var(--muted); }
+.error { color: var(--error); }
+
+.nav { display: flex; gap: 1.5rem; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
+.nav .brand { font-weight: 700; font-size: 1.15rem; text-decoration: none; color: var(--text); }
+.nav nav { display: flex; gap: 1rem; flex: 1; }
+.nav a { text-decoration: none; color: var(--muted); }
+.nav a.active { color: var(--text); font-weight: 600; }
+.nav-user { display: flex; gap: 0.75rem; align-items: center; }
+
+button, .button { font: inherit; border: 0; border-radius: 8px; padding: 0.55rem 1rem; background: var(--accent); color: var(--accent-text); cursor: pointer; text-decoration: none; display: inline-block; }
+button:disabled { opacity: 0.6; cursor: progress; }
+button.link { background: none; color: var(--accent); padding: 0; }
+button.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+button.danger { background: var(--error); color: #fff; }
+.nav a.button { color: var(--accent-text); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+.narrow { max-width: 420px; margin: 2rem auto; }
+form { display: grid; gap: 0.9rem; }
+label { display: grid; gap: 0.3rem; font-weight: 500; }
+input, textarea, select { font: inherit; padding: 0.55rem 0.7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
+.google { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.divider { text-align: center; color: var(--muted); }

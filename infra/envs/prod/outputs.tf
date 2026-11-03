@@ -32,3 +32,13 @@ output "catalog_migrate_function" {
   description = "Lambda that runs Catalog migrations."
   value       = module.stack.catalog_migrate_function
 }
+
+output "web_url" {
+  description = "URL of the web app."
+  value       = module.stack.web_url
+}
+
+output "amplify_app_id" {
+  description = "Amplify app id."
+  value       = module.stack.amplify_app_id
+}

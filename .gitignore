@@ -38,3 +38,4 @@ terraform.tfvars
 .env
 .env.*
 !.env.example
+web/.env.production.local

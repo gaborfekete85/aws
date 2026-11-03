@@ -61,7 +61,7 @@ locals {
     PAYMENTS_TABLE              = aws_dynamodb_table.payments.name
     STRIPE_SECRET_KEY_PARAM     = aws_ssm_parameter.stripe_secret_key.name
     STRIPE_WEBHOOK_SECRET_PARAM = aws_ssm_parameter.stripe_webhook_secret.name
-    WEB_URL                     = var.web_urls[0]
+    WEB_URL                     = local.amplify_url
   })
 }
 

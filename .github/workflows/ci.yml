@@ -59,6 +59,27 @@ jobs:
       - run: bun run test
       - run: bun run build
 
+  e2e-smoke:
+    name: Playwright smoke (offline, fake auth)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+        working-directory: web
+      - run: bun install --frozen-lockfile
+        working-directory: tests/e2e
+      - run: bunx playwright install --with-deps chromium
+        working-directory: tests/e2e
+      - run: bunx playwright test
+        working-directory: tests/e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-smoke-report
+          path: tests/e2e/playwright-report
+          retention-days: 7
+
   terraform:
     name: Terraform (fmt, validate, tflint)
     runs-on: ubuntu-latest

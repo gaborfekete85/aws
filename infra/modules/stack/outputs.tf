@@ -37,3 +37,13 @@ output "media_cdn_domain" {
   description = "CloudFront domain for Cover pictures."
   value       = module.media.cdn_domain
 }
+
+output "web_url" {
+  description = "URL of the web app (Amplify main branch)."
+  value       = local.amplify_url
+}
+
+output "amplify_app_id" {
+  description = "Amplify app id (for deployments)."
+  value       = aws_amplify_app.web.id
+}

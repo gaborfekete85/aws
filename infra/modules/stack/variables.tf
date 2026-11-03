@@ -46,14 +46,9 @@ variable "log_retention_days" {
   default     = 14
 }
 
-variable "cors_allow_origins" {
-  description = "Origins allowed to call the API."
-  type        = list(string)
-  default     = ["*"]
-}
 
 variable "web_urls" {
-  description = "Origins the web app is served from (OAuth callbacks are derived from these)."
+  description = "Extra web origins besides Amplify (e.g. http://localhost:5173 in dev); OAuth callbacks and CORS derive from these."
   type        = list(string)
 }
 

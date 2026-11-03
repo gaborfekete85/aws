@@ -9,7 +9,7 @@ locals {
     EVENT_BUS_NAME  = module.eventbridge.bus_name
     EVENTS_BUS_NAME = module.eventbridge.bus_name # name lbz reads
     LOG_LEVEL       = var.env == "prod" ? "INFO" : "DEBUG"
-    CORS_ORIGINS    = join(",", var.cors_allow_origins)
+    CORS_ORIGINS    = join(",", local.web_origins)
   }
 }
 
@@ -21,7 +21,7 @@ module "eventbridge" {
 module "api" {
   source             = "../api"
   name               = "${local.name}-api"
-  cors_allow_origins = var.cors_allow_origins
+  cors_allow_origins = local.web_origins
   log_retention_days = var.log_retention_days
   # Every route requires a valid Cognito ID token unless marked `public = true`.
   jwt_issuer   = module.cognito.issuer
