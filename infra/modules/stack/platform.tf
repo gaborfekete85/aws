@@ -25,7 +25,7 @@ module "api" {
   log_retention_days = var.log_retention_days
   # Every route requires a valid Cognito ID token unless marked `public = true`.
   jwt_issuer   = module.cognito.issuer
-  jwt_audience = [module.cognito.web_client_id]
+  jwt_audience = compact([module.cognito.web_client_id, module.cognito.test_client_id])
 }
 
 locals {

@@ -167,3 +167,22 @@ resource "aws_cognito_user_pool_client" "web" {
 
   depends_on = [aws_cognito_identity_provider.google]
 }
+
+# Integration tests log in with USER_PASSWORD_AUTH (no SRP in pytest). Dev only;
+# the web client above stays SRP-only.
+resource "aws_cognito_user_pool_client" "test" {
+  count                         = var.create_test_client ? 1 : 0
+  name                          = "${var.name}-integration-tests"
+  user_pool_id                  = aws_cognito_user_pool.this.id
+  generate_secret               = false
+  explicit_auth_flows           = ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
+  prevent_user_existence_errors = "ENABLED"
+  id_token_validity             = 60
+  access_token_validity         = 60
+  refresh_token_validity        = 1
+  token_validity_units {
+    access_token  = "minutes"
+    id_token      = "minutes"
+    refresh_token = "days"
+  }
+}

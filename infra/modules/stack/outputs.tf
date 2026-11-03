@@ -47,3 +47,13 @@ output "amplify_app_id" {
   description = "Amplify app id (for deployments)."
   value       = aws_amplify_app.web.id
 }
+
+output "bus_spy_queue_url" {
+  description = "Dev only: SQS queue receiving every domain event (integration tests)."
+  value       = try(aws_sqs_queue.bus_spy[0].url, null)
+}
+
+output "test_client_id" {
+  description = "Dev only: Cognito client for integration-test logins."
+  value       = module.cognito.test_client_id
+}

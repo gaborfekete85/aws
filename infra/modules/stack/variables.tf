@@ -74,3 +74,9 @@ variable "ses_max_send_rate" {
   type        = number
   default     = 1
 }
+
+variable "enable_test_harness" {
+  description = "Dev only: bus spy queue and a USER_PASSWORD_AUTH Cognito client for the integration suite."
+  type        = bool
+  default     = false
+}

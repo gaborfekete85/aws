@@ -71,12 +71,26 @@ jobs:
           echo "api_endpoint=$(terraform output -raw api_endpoint)" >> "$GITHUB_OUTPUT"
           echo "web_url=$(terraform output -raw web_url)" >> "$GITHUB_OUTPUT"
       - uses: astral-sh/setup-uv@v5
-      - name: Post-deploy integration tests
+      - name: Post-deploy integration tests (APIs + events on the bus)
         env:
           API_BASE_URL: ${{ steps.out.outputs.api_endpoint }}
+          E2E_ORGANIZER_EMAIL: ${{ secrets.E2E_ORGANIZER_EMAIL }}
+          E2E_ORGANIZER_PASSWORD: ${{ secrets.E2E_ORGANIZER_PASSWORD }}
+          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
         run: |
+          BUS_SPY_QUEUE_URL=$(terraform -chdir=infra/envs/dev output -raw bus_spy_queue_url)
+          TEST_CLIENT_ID=$(terraform -chdir=infra/envs/dev output -raw test_client_id)
+          export BUS_SPY_QUEUE_URL TEST_CLIENT_ID
           uv sync --frozen
-          uv run pytest tests/integration -m dev -v
+          uv run pytest tests/integration -m dev -v --junitxml=integration-results.xml
+      - name: Upload integration results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-dev-${{ github.run_id }}
+          path: integration-results.xml
+          retention-days: 14
 
   e2e-dev:
     name: Playwright journeys against dev

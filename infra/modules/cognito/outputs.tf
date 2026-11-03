@@ -24,3 +24,8 @@ output "hosted_ui_domain" {
   description = "Hosted UI domain (without https://)."
   value       = "${aws_cognito_user_pool_domain.this.domain}.auth.${data.aws_region.current.region}.amazoncognito.com"
 }
+
+output "test_client_id" {
+  description = "Integration-test app client id (dev only), or null."
+  value       = try(aws_cognito_user_pool_client.test[0].id, null)
+}

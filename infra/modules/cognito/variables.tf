@@ -29,3 +29,9 @@ variable "deletion_protection" {
   type        = bool
   default     = false
 }
+
+variable "create_test_client" {
+  description = "Dev only: an app client allowing USER_PASSWORD_AUTH for the integration suite."
+  type        = bool
+  default     = false
+}

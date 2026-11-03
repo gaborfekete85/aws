@@ -89,3 +89,28 @@ run "google_can_be_disabled" {
     error_message = "without Google only COGNITO is supported"
   }
 }
+
+run "no_password_auth_client_by_default" {
+  command = apply
+
+  assert {
+    condition     = length(aws_cognito_user_pool_client.test) == 0 && output.test_client_id == null
+    error_message = "the USER_PASSWORD_AUTH test client must only exist when asked for (dev)"
+  }
+  assert {
+    condition     = !contains(aws_cognito_user_pool_client.web.explicit_auth_flows, "ALLOW_USER_PASSWORD_AUTH")
+    error_message = "the web client stays SRP-only"
+  }
+}
+
+run "test_client_when_enabled" {
+  command = apply
+  variables {
+    create_test_client = true
+  }
+
+  assert {
+    condition     = contains(aws_cognito_user_pool_client.test[0].explicit_auth_flows, "ALLOW_USER_PASSWORD_AUTH")
+    error_message = "the dev test client allows USER_PASSWORD_AUTH"
+  }
+}

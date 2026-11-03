@@ -5,6 +5,7 @@ module "stack" {
   nat                         = "instance"
   interface_endpoint_az_count = 1
   budget_usd                  = 40
+  enable_test_harness         = true
   alert_emails                = var.alert_emails
   sender_email                = var.sender_email
   web_urls                    = ["http://localhost:5173"]

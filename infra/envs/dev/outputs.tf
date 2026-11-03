@@ -42,3 +42,13 @@ output "amplify_app_id" {
   description = "Amplify app id."
   value       = module.stack.amplify_app_id
 }
+
+output "bus_spy_queue_url" {
+  description = "SQS queue receiving every domain event (integration tests)."
+  value       = module.stack.bus_spy_queue_url
+}
+
+output "test_client_id" {
+  description = "Cognito client for integration-test logins."
+  value       = module.stack.test_client_id
+}

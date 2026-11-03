@@ -6,6 +6,7 @@ module "cognito" {
   logout_urls         = [for u in local.web_origins : "${u}/"]
   enable_google       = var.enable_google_login
   deletion_protection = var.env == "prod"
+  create_test_client  = var.enable_test_harness
 }
 
 # Admin-only API over Cognito groups (assign / revoke the organizer role).
