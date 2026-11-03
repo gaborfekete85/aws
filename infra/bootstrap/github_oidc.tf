@@ -15,7 +15,7 @@ data "aws_iam_openid_connect_provider" "github" {
 
 locals {
   oidc_provider_arn = var.create_github_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : data.aws_iam_openid_connect_provider.github[0].arn
-  repo              = "repo:${var.github_repository}"
+  repo              = coalesce(var.github_subject_prefix, "repo:${var.github_repository}")
   account_id        = data.aws_caller_identity.current.account_id
   name_prefix       = var.project
 }
