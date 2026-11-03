@@ -32,9 +32,9 @@ flowchart LR
 | Service | Owns | Store | Publishes | Consumes |
 |---|---|---|---|---|
 | **Catalog** | Event, Location, Event status, Cover picture | PostgreSQL + PostGIS | `EventPublished`, `EventUpdated`, `EventCancelled` | — |
-| **Booking** | Booking, Hold, Places counter | DynamoDB | `BookingRequested`, `BookingConfirmed`, `BookingCancelled`, `HoldExpired` | `EventPublished`, `EventUpdated`, `EventCancelled`, `PaymentSucceeded`, `PaymentFailed` |
-| **Payments** | Checkout sessions | (Stripe + idempotency keys in DynamoDB) | `PaymentSucceeded`, `PaymentFailed` | `BookingRequested` |
-| **Notifications** | Outgoing email | — | — | `BookingConfirmed`, `EventCancelled` (via SQS) |
+| **Booking** | Booking, Hold, Places counter | DynamoDB | `BookingRequested`, `BookingConfirmed`, `BookingCancelled`, `HoldExpired`, `EventBookingsCancelled` | `EventPublished`, `EventUpdated`, `EventCancelled`, `PaymentSucceeded`, `PaymentFailed` |
+| **Payments** | Checkout sessions | (Stripe + idempotency keys in DynamoDB) | `PaymentSucceeded`, `PaymentFailed` | `BookingRequested`, `HoldExpired` |
+| **Notifications** | Outgoing email | (sent markers in DynamoDB) | — | `BookingConfirmed`, `EventBookingsCancelled` (via SQS; ADR-0005) |
 
 Identity and roles live in Cognito. Admins assign the `organizer` group. Organizers manage only their own Events; Admins can manage any Event.
 
@@ -44,7 +44,7 @@ Identity and roles live in Cognito. Admins assign the `organizer` group. Organiz
 2. Payments creates a Stripe Checkout session → the web app redirects the Attendee to Stripe.
 3. Stripe calls the webhook → Payments checks the signature → emits `PaymentSucceeded`.
 4. Booking confirms the Booking → emits `BookingConfirmed` → Notifications emails the Attendee.
-5. If payment never arrives, the DynamoDB TTL / scheduled sweep expires the Hold → places are released.
+5. If payment never arrives, the scheduled sweep expires the Hold → places are released, `HoldExpired` → Payments expires the Stripe session (ADR-0004).
 
 A free Event skips steps 2–3.
 

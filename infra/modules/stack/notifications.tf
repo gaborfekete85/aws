@@ -12,7 +12,7 @@ resource "aws_sqs_queue" "notifications_dlq" {
 
 resource "aws_sqs_queue" "notifications" {
   name                       = "${local.name}-notifications"
-  visibility_timeout_seconds = 6 * 60 # >= 6x the function timeout (AWS guidance)
+  visibility_timeout_seconds = 6 * 300 # >= 6x the function timeout (AWS guidance)
   message_retention_seconds  = 345600
   sqs_managed_sse_enabled    = true
 
@@ -97,10 +97,11 @@ module "notifications" {
   package_path             = "${var.lambda_packages_dir}/notifications.zip"
   handler                  = "notifications.app.handle"
   memory_size              = 256
-  timeout                  = 60
+  timeout                  = 300 # a 200-Attendee chunk at the sandbox rate (1/s) takes ~200 s
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment = merge(local.common_env, {
+    SES_MAX_CONCURRENCY = "5"
     SENDER_EMAIL        = var.sender_email
     NOTIFICATIONS_TABLE = aws_dynamodb_table.notifications.name
     SES_MAX_SEND_RATE   = tostring(var.ses_max_send_rate)
