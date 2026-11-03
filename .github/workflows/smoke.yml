@@ -1,0 +1,87 @@
+name: Smoke / load test
+
+on:
+  workflow_dispatch:
+    inputs:
+      searches:
+        description: Concurrent Event searches
+        default: "200"
+      bookings:
+        description: Concurrent Booking attempts at one Event
+        default: "60"
+      places:
+        description: Places of the load-test Event
+        default: "20"
+      concurrency:
+        description: Max requests in flight
+        default: "25"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: smoke-dev
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: aiohttp smoke/load against dev
+    if: vars.AWS_PLAN_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    # no `environment:` here: it would change the OIDC subject, which the read-only plan role does not trust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: eu-central-1
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.15"
+          terraform_wrapper: false
+      - name: Resolve dev API and test client
+        id: dev
+        working-directory: infra/envs/dev
+        env:
+          TF_VAR_alert_emails: ${{ vars.ALERT_EMAILS }}
+          TF_VAR_sender_email: ${{ vars.SENDER_EMAIL }}
+        run: |
+          terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" >/dev/null
+          echo "api=$(terraform output -raw api_endpoint)" >> "$GITHUB_OUTPUT"
+          echo "client=$(terraform output -raw test_client_id)" >> "$GITHUB_OUTPUT"
+      - name: Get ID tokens for the test users
+        id: tokens
+        env:
+          CLIENT_ID: ${{ steps.dev.outputs.client }}
+          ORG_EMAIL: ${{ secrets.E2E_ORGANIZER_EMAIL }}
+          ORG_PASSWORD: ${{ secrets.E2E_ORGANIZER_PASSWORD }}
+          USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+        run: |
+          token() {
+            aws cognito-idp initiate-auth --client-id "$CLIENT_ID" --auth-flow USER_PASSWORD_AUTH \
+              --auth-parameters "USERNAME=$1,PASSWORD=$2" --query AuthenticationResult.IdToken --output text
+          }
+          org=$(token "$ORG_EMAIL" "$ORG_PASSWORD")
+          user=$(token "$USER_EMAIL" "$USER_PASSWORD")
+          echo "::add-mask::$org"
+          echo "::add-mask::$user"
+          { echo "organizer=$org"; echo "attendee=$user"; } >> "$GITHUB_OUTPUT"
+      - name: Run
+        shell: bash # -eo pipefail: a failing load test must not be masked by tee
+        run: |
+          uv sync --frozen
+          uv run python tests/smoke/load.py \
+            --base-url "${{ steps.dev.outputs.api }}" \
+            --organizer-token "${{ steps.tokens.outputs.organizer }}" \
+            --attendee-token "${{ steps.tokens.outputs.attendee }}" \
+            --searches "${{ inputs.searches }}" --bookings "${{ inputs.bookings }}" \
+            --places "${{ inputs.places }}" --concurrency "${{ inputs.concurrency }}" \
+            | tee smoke-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-report-${{ github.run_id }}
+          path: smoke-report.json
