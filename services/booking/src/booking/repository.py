@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from localbini_shared.errors import NotFoundError
-
 from booking.domain import Booking
 from booking.table import BOOKING_SK, attendee_gsi, booking_pk, client, event_pk, table_name
+from localbini_shared.errors import NotFoundError
 
 
 def get(booking_id: str) -> Booking:

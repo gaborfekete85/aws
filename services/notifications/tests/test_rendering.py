@@ -1,5 +1,6 @@
 import pytest
 from jinja2 import UndefinedError
+
 from notifications.rendering import format_money, format_when, render
 
 

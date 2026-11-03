@@ -3,11 +3,12 @@ import json
 from lbz.events import EventAPI
 from lbz.response import Response
 from lbz.router import add_route
+from pydantic import BaseModel
+
 from localbini_shared.api import ApiResource, domain_errors, make_http_handler
 from localbini_shared.errors import ConflictError
 from localbini_shared.events import new_event, register
 from localbini_shared.testing import http_api_event
-from pydantic import BaseModel
 
 
 class Payload(BaseModel):

@@ -9,9 +9,6 @@ from zoneinfo import ZoneInfo
 
 from lbz.response import Response
 from lbz.router import add_route
-from localbini_shared.api import ApiResource, domain_errors, make_http_handler
-from localbini_shared.errors import ValidationError
-from localbini_shared.events import register
 from sqlalchemy.orm import Session
 
 from catalog.db import session_factory
@@ -22,6 +19,9 @@ from catalog.repository import EventRepository
 from catalog.schemas import CoverAttach, CoverUploadRequest, EventCreate, EventUpdate, event_out
 from catalog.search import SearchPage, SearchQuery, get_public, search_published
 from catalog.service import OrganizerEvents, parse_event_id
+from localbini_shared.api import ApiResource, domain_errors, make_http_handler
+from localbini_shared.errors import ValidationError
+from localbini_shared.events import register
 
 
 def _default_session() -> Session:

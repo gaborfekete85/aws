@@ -15,6 +15,7 @@ os.environ.setdefault("PAYMENTS_TABLE", "localbini-test-payments")
 @pytest.fixture
 def payments_table(monkeypatch):
     from moto import mock_aws
+
     from payments import store
 
     name = f"payments-{uuid.uuid4().hex[:8]}"

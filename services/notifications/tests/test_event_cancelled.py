@@ -5,6 +5,7 @@ import threading
 import time
 
 import pytest
+
 from localbini_shared.events import new_event
 from notifications import sender
 from notifications.app import handle

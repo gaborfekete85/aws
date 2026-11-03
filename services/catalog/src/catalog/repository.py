@@ -6,13 +6,13 @@ import uuid
 from collections.abc import Sequence
 
 from geoalchemy2.shape import from_shape, to_shape
-from localbini_shared.errors import NotFoundError
 from shapely.geometry import Point
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from catalog.domain import Event, EventStatus, GeoPoint, Location, Money
 from catalog.models import EventRow, LocationRow
+from localbini_shared.errors import NotFoundError
 
 
 def _point_to_db(point: GeoPoint) -> object:

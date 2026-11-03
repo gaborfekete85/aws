@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from alembic import context
-from catalog.db import get_engine
 from sqlalchemy import Connection
+
+from catalog.db import get_engine
 
 target_metadata = None
 try:  # the ORM metadata exists once the domain model is defined

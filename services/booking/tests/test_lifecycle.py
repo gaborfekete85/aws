@@ -3,6 +3,7 @@
 from datetime import timedelta
 
 import pytest
+
 from booking import consumers, lifecycle, places, repository
 from booking.domain import BookingStatus
 from booking.expiry import sweep

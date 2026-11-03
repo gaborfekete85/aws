@@ -3,6 +3,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from catalog.domain import (
     EventStatus,
     GeoPoint,

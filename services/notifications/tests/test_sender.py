@@ -1,4 +1,5 @@
 import pytest
+
 from notifications import sender
 from notifications.rendering import Email
 

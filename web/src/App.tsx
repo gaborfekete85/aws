@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import { useAppDispatch } from './app/hooks'
 import { loadSession } from './auth/authSlice'
 import { NavBar } from './components/NavBar'
+import { AdminPage } from './features/admin/AdminPage'
 import { RequireRole } from './components/RequireRole'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { HomePage } from './pages/HomePage'
@@ -45,7 +46,7 @@ export default function App() {
             path="/admin"
             element={
               <RequireRole role="admin">
-                <Placeholder title="Admin" />
+                <AdminPage />
               </RequireRole>
             }
           />

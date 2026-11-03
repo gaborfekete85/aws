@@ -10,7 +10,6 @@ from typing import Any
 from localbini_shared.auth import Principal, require_authenticated
 from localbini_shared.errors import ForbiddenError
 from localbini_shared.logging import get_logger
-
 from payments import store
 from payments.gateway import (
     STRIPE_MIN_EXPIRY_SECONDS,

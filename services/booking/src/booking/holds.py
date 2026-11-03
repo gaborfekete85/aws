@@ -14,7 +14,6 @@ from datetime import datetime
 from typing import Any
 
 from botocore.exceptions import ClientError
-from localbini_shared.errors import ConflictError
 
 from booking.table import (
     BOOKING_SK,
@@ -27,6 +26,7 @@ from booking.table import (
     hold_sk,
     table_name,
 )
+from localbini_shared.errors import ConflictError
 
 
 class NotEnoughPlaces(ConflictError):

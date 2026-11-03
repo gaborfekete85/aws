@@ -3,6 +3,7 @@
 import pytest
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
+
 from catalog.models import Base
 
 pytestmark = pytest.mark.integration

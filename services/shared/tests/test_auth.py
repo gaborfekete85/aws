@@ -1,6 +1,7 @@
 """Visitor / Attendee / Organizer / Admin permutations for the shared auth helpers."""
 
 import pytest
+
 from localbini_shared.auth import (
     ANONYMOUS,
     Principal,

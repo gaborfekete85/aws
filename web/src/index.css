@@ -52,3 +52,7 @@ label { display: grid; gap: 0.3rem; font-weight: 500; }
 input, textarea, select { font: inherit; padding: 0.55rem 0.7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
 .google { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 .divider { text-align: center; color: var(--muted); }
+
+.table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.table th, .table td { text-align: left; padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border); }
+.table th { color: var(--muted); font-weight: 600; font-size: 0.9rem; }

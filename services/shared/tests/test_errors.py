@@ -1,5 +1,6 @@
 import pytest
 from lbz.exceptions import Conflict, NotFound, PermissionDenied, Unauthorized, UnprocessableEntity
+
 from localbini_shared.errors import (
     ConflictError,
     ForbiddenError,

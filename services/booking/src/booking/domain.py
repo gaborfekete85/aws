@@ -8,9 +8,8 @@ from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from typing import Any
 
-from localbini_shared.errors import ConflictError, ValidationError
-
 from booking.table import BOOKING_SK, attendee_gsi, booking_pk, event_pk
+from localbini_shared.errors import ConflictError, ValidationError
 
 MAX_PLACES_PER_BOOKING = 10
 

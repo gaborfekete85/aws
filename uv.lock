@@ -11,6 +11,7 @@ members = [
     "localbini",
     "localbini-booking",
     "localbini-catalog",
+    "localbini-identity",
     "localbini-notifications",
     "localbini-payments",
     "localbini-shared",
@@ -944,6 +945,7 @@ dev = [
     { name = "httpx" },
     { name = "localbini-booking" },
     { name = "localbini-catalog" },
+    { name = "localbini-identity" },
     { name = "localbini-notifications" },
     { name = "localbini-payments" },
     { name = "localbini-shared" },
@@ -964,6 +966,7 @@ dev = [
     { name = "httpx", specifier = ">=0.27" },
     { name = "localbini-booking", editable = "services/booking" },
     { name = "localbini-catalog", editable = "services/catalog" },
+    { name = "localbini-identity", editable = "services/identity" },
     { name = "localbini-notifications", editable = "services/notifications" },
     { name = "localbini-payments", editable = "services/payments" },
     { name = "localbini-shared", editable = "services/shared" },
@@ -1010,6 +1013,17 @@ requires-dist = [
     { name = "shapely", specifier = ">=2.0" },
     { name = "sqlalchemy", specifier = ">=2.0.36" },
 ]
+
+[[package]]
+name = "localbini-identity"
+version = "0.1.0"
+source = { editable = "services/identity" }
+dependencies = [
+    { name = "localbini-shared" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "localbini-shared", editable = "services/shared" }]
 
 [[package]]
 name = "localbini-notifications"

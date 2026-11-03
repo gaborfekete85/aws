@@ -2,6 +2,7 @@ import json
 
 from lbz.response import Response
 from lbz.router import add_route
+
 from localbini_shared.api import ApiResource, domain_errors, make_http_handler
 from localbini_shared.auth import Role, require_role
 from localbini_shared.testing import http_api_event

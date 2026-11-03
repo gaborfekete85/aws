@@ -4,6 +4,7 @@ import re
 
 import pytest
 from aioresponses import aioresponses
+
 from catalog.domain import GeoPoint
 from catalog.geocoding import (
     USER_AGENT,

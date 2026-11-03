@@ -1,6 +1,7 @@
 import pytest
-from catalog.migrate import alembic_config
 from sqlalchemy import text
+
+from catalog.migrate import alembic_config
 
 
 def test_migration_chain_is_linear_and_starts_with_postgis() -> None:

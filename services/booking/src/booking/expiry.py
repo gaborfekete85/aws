@@ -11,12 +11,11 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
-from localbini_shared.events import DomainEvent, EventPublisher
-from localbini_shared.logging import configure_logging, get_logger
-
 from booking import repository
 from booking.events import hold_expired
 from booking.holds import due_holds, expire_hold
+from localbini_shared.events import DomainEvent, EventPublisher
+from localbini_shared.logging import configure_logging, get_logger
 
 logger = get_logger(__name__)
 

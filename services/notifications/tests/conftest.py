@@ -16,6 +16,7 @@ os.environ.setdefault("SENDER_EMAIL", "no-reply@localbini.test")
 def aws(monkeypatch):
     """moto SES (sender verified) + the sent-marker table."""
     from moto import mock_aws
+
     from notifications import sender
 
     name = f"notifications-{uuid.uuid4().hex[:8]}"

@@ -1,8 +1,9 @@
 import json
 
 import boto3
-from catalog import db
 from moto import mock_aws
+
+from catalog import db
 
 
 def test_url_built_from_rds_managed_secret(monkeypatch) -> None:

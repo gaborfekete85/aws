@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from lbz.response import Response
 from lbz.router import add_route
-from localbini_shared.api import ApiResource, domain_errors, make_http_handler
-from localbini_shared.events import register
 from pydantic import BaseModel, ConfigDict, Field
 
 from booking import service
 from booking.domain import MAX_PLACES_PER_BOOKING
+from localbini_shared.api import ApiResource, domain_errors, make_http_handler
+from localbini_shared.events import register
 
 
 class BookingRequest(BaseModel):

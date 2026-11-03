@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from localbini_shared.events import DomainEvent, new_event
-
 from booking.domain import Booking
+from localbini_shared.events import DomainEvent, new_event
 
 SERVICE = "booking"
 BOOKING_REQUESTED = "BookingRequested"

@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 
 import pytest
+
 from localbini_shared.events import PublishError
 from localbini_shared.testing import RecordingEventBridge
 from payments import store

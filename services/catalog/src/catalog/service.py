@@ -10,16 +10,15 @@ import uuid
 from collections.abc import Sequence
 from typing import Any
 
-from localbini_shared.auth import Principal, Role, require_owner_or_admin, require_role
-from localbini_shared.errors import ForbiddenError, NotFoundError, ValidationError
-from localbini_shared.events import DomainEvent
-
 from catalog.domain import Event, EventStatus, Money
 from catalog.events import event_cancelled, event_published, event_updated
 from catalog.geocoding import Geocoder
 from catalog.locations import LocationInput, location_changed, resolve_location
 from catalog.repository import EventRepository
 from catalog.schemas import EventCreate, EventUpdate
+from localbini_shared.auth import Principal, Role, require_owner_or_admin, require_role
+from localbini_shared.errors import ForbiddenError, NotFoundError, ValidationError
+from localbini_shared.events import DomainEvent
 
 
 def parse_event_id(raw: str) -> uuid.UUID:

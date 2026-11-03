@@ -11,10 +11,10 @@ from typing import Any
 
 from alembic import command
 from alembic.config import Config
-from localbini_shared.logging import configure_logging, get_logger
 from sqlalchemy import text
 
 from catalog.db import get_engine
+from localbini_shared.logging import configure_logging, get_logger
 
 logger = get_logger(__name__)
 

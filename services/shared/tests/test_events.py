@@ -1,6 +1,7 @@
 import json
 
 import pytest
+
 from localbini_shared.events import DomainEvent, EventPublisher, PublishError, new_event
 from localbini_shared.logging import bind_request
 from localbini_shared.testing import eventbridge_event

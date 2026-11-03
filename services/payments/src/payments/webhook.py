@@ -12,10 +12,10 @@ from typing import Any
 
 import stripe
 from botocore.exceptions import ClientError
+
 from localbini_shared.errors import DomainError
 from localbini_shared.events import DomainEvent, EventPublisher, new_event
 from localbini_shared.logging import get_logger
-
 from payments import store
 from payments.gateway import PaymentGateway, StripeGateway
 

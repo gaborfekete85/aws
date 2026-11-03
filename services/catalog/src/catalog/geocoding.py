@@ -14,10 +14,10 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 import aiohttp
-from localbini_shared.errors import ValidationError
-from localbini_shared.logging import get_logger
 
 from catalog.domain import GeoPoint
+from localbini_shared.errors import ValidationError
+from localbini_shared.logging import get_logger
 
 logger = get_logger(__name__)
 

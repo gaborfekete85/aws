@@ -5,9 +5,10 @@ from urllib.parse import parse_qs, urlparse
 
 import boto3
 import pytest
+from moto import mock_aws
+
 from catalog.media import MAX_BYTES, CoverPictures
 from localbini_shared.errors import ValidationError
-from moto import mock_aws
 
 from .conftest import ORGANIZER, OTHER_ORGANIZER
 

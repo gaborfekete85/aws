@@ -10,13 +10,13 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from geoalchemy2 import Geography
-from localbini_shared.errors import ValidationError
 from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from catalog.domain import Event, EventStatus, utcnow
 from catalog.models import EventRow, LocationRow
 from catalog.repository import event_from_row
+from localbini_shared.errors import ValidationError
 
 MAX_RADIUS_KM = 200.0
 DEFAULT_RADIUS_KM = 25.0

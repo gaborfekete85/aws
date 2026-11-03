@@ -12,10 +12,10 @@ from datetime import datetime
 from typing import Any
 
 from botocore.exceptions import ClientError
-from localbini_shared.errors import NotFoundError
-from localbini_shared.logging import get_logger
 
 from booking.table import PLACES_SK, client, event_pk, table_name
+from localbini_shared.errors import NotFoundError
+from localbini_shared.logging import get_logger
 
 logger = get_logger(__name__)
 

@@ -3,11 +3,12 @@
 import uuid
 
 import pytest
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
+
 from catalog.domain import EventStatus, GeoPoint, Location
 from catalog.repository import EventRepository
 from localbini_shared.errors import NotFoundError
-from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError
 
 pytestmark = pytest.mark.integration
 

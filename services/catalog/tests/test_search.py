@@ -3,11 +3,12 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlalchemy import text
+
 from catalog.domain import GeoPoint, Location
 from catalog.repository import EventRepository
 from catalog.search import SearchQuery, search_published
 from localbini_shared.errors import ValidationError
-from sqlalchemy import text
 
 pytestmark = pytest.mark.integration
 

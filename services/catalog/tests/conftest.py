@@ -96,10 +96,11 @@ class StubGeocoder:
 @pytest.fixture
 def catalog_api(migrated_engine):
     """The Catalog Lambda handler wired to the test DB, a stub geocoder and a moto bus."""
-    from catalog.api import CatalogResource, handle
     from moto import mock_aws
     from sqlalchemy import text
     from sqlalchemy.orm import sessionmaker
+
+    from catalog.api import CatalogResource, handle
 
     factory = sessionmaker(bind=migrated_engine, expire_on_commit=False)
     original = (CatalogResource.session_provider, CatalogResource.geocoder_provider)
@@ -171,6 +172,7 @@ def sent_events():
 def media(catalog_api):
     """A moto S3 media bucket wired into the Catalog API (inside catalog_api's mock_aws)."""
     import boto3
+
     from catalog.api import CatalogResource
     from catalog.media import CoverPictures
 

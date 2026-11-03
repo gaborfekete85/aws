@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from booking import places
 from booking.domain import Booking
 from booking.holds import EventNotOpen, HoldRequest, NotEnoughPlaces, place_hold, release_places

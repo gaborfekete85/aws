@@ -3,6 +3,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from booking import places
 
 from .conftest import ADMIN, ATTENDEE, OTHER_ATTENDEE
