@@ -33,7 +33,7 @@ module "identity_api" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = merge(local.common_env, { USER_POOL_ID = module.cognito.user_pool_id })
-  policy_json              = data.aws_iam_policy_document.identity_admin.json
+  policy                   = { json = data.aws_iam_policy_document.identity_admin.json }
   api                      = local.api
   routes = [
     { route_key = "GET /admin/users" },

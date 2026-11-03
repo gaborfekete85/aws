@@ -44,14 +44,14 @@ resource "aws_apigatewayv2_stage" "default" {
 }
 
 resource "aws_apigatewayv2_authorizer" "jwt" {
-  count            = var.jwt_issuer == null ? 0 : 1
+  count            = var.jwt == null ? 0 : 1
   api_id           = aws_apigatewayv2_api.this.id
   name             = "cognito"
   authorizer_type  = "JWT"
   identity_sources = ["$request.header.Authorization"]
 
   jwt_configuration {
-    issuer   = var.jwt_issuer
-    audience = var.jwt_audience
+    issuer   = var.jwt.issuer
+    audience = var.jwt.audience
   }
 }

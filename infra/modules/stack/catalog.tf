@@ -1,4 +1,5 @@
 module "catalog_db" {
+  count                     = var.external_catalog_db == null ? 1 : 0
   source                    = "../rds"
   name                      = local.name
   vpc_id                    = module.network.vpc_id
@@ -16,18 +17,39 @@ locals {
     subnet_ids         = module.network.private_subnet_ids
     security_group_ids = [module.network.lambda_security_group_id]
   }
-  catalog_db_env = {
-    DB_HOST       = module.catalog_db.address
-    DB_PORT       = tostring(module.catalog_db.port)
-    DB_NAME       = module.catalog_db.db_name
-    DB_SECRET_ARN = module.catalog_db.secret_arn
+  external_db = var.external_catalog_db
+  catalog_db_env = local.external_db == null ? {
+    DB_HOST       = module.catalog_db[0].address
+    DB_PORT       = tostring(module.catalog_db[0].port)
+    DB_NAME       = module.catalog_db[0].db_name
+    DB_SECRET_ARN = module.catalog_db[0].secret_arn
+    } : {
+    DB_HOST       = sensitive(local.external_db.host) # keep it out of public CI logs
+    DB_PORT       = tostring(local.external_db.port)
+    DB_NAME       = local.external_db.db_name
+    DB_SECRET_ARN = data.aws_secretsmanager_secret.external_catalog_db[0].arn
+  }
+}
+
+# An existing database (dev): its credentials secret is created outside Terraform
+# by scripts/setup_external_db.sh, together with the role and database it describes.
+data "aws_secretsmanager_secret" "external_catalog_db" {
+  count = local.external_db == null ? 0 : 1
+  name  = local.external_db.secret_name
+
+  lifecycle {
+    precondition {
+      # The workload permissions boundary only lets Lambdas read `<project>-<env>-*` secrets.
+      condition     = startswith(local.external_db.secret_name, "${local.name}-")
+      error_message = "external_catalog_db.secret_name must start with \"${local.name}-\"."
+    }
   }
 }
 
 data "aws_iam_policy_document" "catalog_db_secret" {
   statement {
     actions   = ["secretsmanager:GetSecretValue"]
-    resources = [module.catalog_db.secret_arn]
+    resources = [local.catalog_db_env.DB_SECRET_ARN]
   }
 }
 
@@ -43,7 +65,7 @@ module "catalog_migrate" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = merge(local.common_env, local.catalog_db_env)
-  policy_json              = data.aws_iam_policy_document.catalog_db_secret.json
+  policy                   = { json = data.aws_iam_policy_document.catalog_db_secret.json }
   vpc                      = local.catalog_vpc
 }
 
@@ -81,9 +103,9 @@ module "catalog_api" {
     MEDIA_BUCKET     = module.media.bucket_name
     MEDIA_CDN_DOMAIN = module.media.cdn_domain
   })
-  policy_json = data.aws_iam_policy_document.catalog_api.json
-  vpc         = local.catalog_vpc
-  api         = local.api
+  policy = { json = data.aws_iam_policy_document.catalog_api.json }
+  vpc    = local.catalog_vpc
+  api    = local.api
   routes = [
     { route_key = "POST /events" },
     { route_key = "PATCH /events/{event_id}" },

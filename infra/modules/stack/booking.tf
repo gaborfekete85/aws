@@ -92,9 +92,9 @@ module "booking_consumer" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = local.booking_env
-  policy_json              = data.aws_iam_policy_document.booking_table.json
+  policy                   = { json = data.aws_iam_policy_document.booking_table.json }
   bus_name                 = module.eventbridge.bus_name
-  async_failure_queue_arn  = aws_sqs_queue.booking_dlq.arn
+  async_failure_queue      = { arn = aws_sqs_queue.booking_dlq.arn }
   event_rules = {
     catalog = jsonencode({
       source        = ["meeton.catalog"]
@@ -117,7 +117,7 @@ module "booking_api" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = local.booking_env
-  policy_json              = data.aws_iam_policy_document.booking_table.json
+  policy                   = { json = data.aws_iam_policy_document.booking_table.json }
   api                      = local.api
   routes = [
     { route_key = "POST /events/{event_id}/bookings" },
@@ -140,6 +140,6 @@ module "booking_expiry" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = local.booking_env
-  policy_json              = data.aws_iam_policy_document.booking_table.json
+  policy                   = { json = data.aws_iam_policy_document.booking_table.json }
   schedule_expression      = "rate(1 minute)"
 }

@@ -30,10 +30,10 @@ resource "aws_iam_role_policy_attachment" "vpc" {
 }
 
 resource "aws_iam_role_policy" "extra" {
-  count  = var.policy_json == null ? 0 : 1
+  count  = var.policy == null ? 0 : 1
   name   = "${var.name}-extra"
   role   = aws_iam_role.this.id
-  policy = var.policy_json
+  policy = var.policy.json
 }
 
 resource "aws_cloudwatch_log_group" "this" {
@@ -167,28 +167,28 @@ resource "aws_lambda_permission" "schedule" {
 
 # --- async failure handling (EventBridge consumers) ---------------------------
 resource "aws_lambda_function_event_invoke_config" "this" {
-  count                        = var.async_failure_queue_arn == null ? 0 : 1
+  count                        = var.async_failure_queue == null ? 0 : 1
   function_name                = aws_lambda_function.this.function_name
   maximum_retry_attempts       = var.async_max_retries
   maximum_event_age_in_seconds = 3600
 
   destination_config {
     on_failure {
-      destination = var.async_failure_queue_arn
+      destination = var.async_failure_queue.arn
     }
   }
 }
 
 data "aws_iam_policy_document" "dlq" {
-  count = var.async_failure_queue_arn == null ? 0 : 1
+  count = var.async_failure_queue == null ? 0 : 1
   statement {
     actions   = ["sqs:SendMessage"]
-    resources = [var.async_failure_queue_arn]
+    resources = [var.async_failure_queue.arn]
   }
 }
 
 resource "aws_iam_role_policy" "dlq" {
-  count  = var.async_failure_queue_arn == null ? 0 : 1
+  count  = var.async_failure_queue == null ? 0 : 1
   name   = "${var.name}-dlq"
   role   = aws_iam_role.this.id
   policy = data.aws_iam_policy_document.dlq[0].json

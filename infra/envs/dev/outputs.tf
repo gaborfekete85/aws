@@ -52,3 +52,8 @@ output "test_client_id" {
   description = "Cognito client for integration-test logins."
   value       = module.stack.test_client_id
 }
+
+output "egress_public_ip" {
+  description = "Public IPv4 of the dev NAT (the address the existing database allowlists)."
+  value       = module.stack.egress_public_ip
+}

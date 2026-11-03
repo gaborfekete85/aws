@@ -36,6 +36,8 @@ jobs:
         env:
           TF_VAR_alert_emails: ${{ vars.ALERT_EMAILS }}
           TF_VAR_sender_email: ${{ vars.SENDER_EMAIL }}
+          TF_VAR_external_db_host: ${{ secrets.DEV_EXTERNAL_DB_HOST }}
+          TF_VAR_external_db_security_group_id: ${{ secrets.DEV_EXTERNAL_DB_SG_ID }}
         run: |
           terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" >/dev/null
           echo "web=$(terraform output -raw web_url)" >> "$GITHUB_OUTPUT"

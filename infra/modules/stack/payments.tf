@@ -105,9 +105,9 @@ module "payments_consumer" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = local.payments_env
-  policy_json              = data.aws_iam_policy_document.payments.json
+  policy                   = { json = data.aws_iam_policy_document.payments.json }
   bus_name                 = module.eventbridge.bus_name
-  async_failure_queue_arn  = aws_sqs_queue.payments_dlq.arn
+  async_failure_queue      = { arn = aws_sqs_queue.payments_dlq.arn }
   event_rules = {
     booking = jsonencode({
       source        = ["meeton.booking"]
@@ -126,7 +126,7 @@ module "payments_api" {
   permissions_boundary_arn = local.boundary_arn
   log_retention_days       = var.log_retention_days
   environment              = local.payments_env
-  policy_json              = data.aws_iam_policy_document.payments.json
+  policy                   = { json = data.aws_iam_policy_document.payments.json }
   api                      = local.api
   routes = [
     { route_key = "GET /bookings/{booking_id}/checkout" },

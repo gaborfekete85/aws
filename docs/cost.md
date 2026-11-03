@@ -4,12 +4,12 @@ Region `eu-central-1`, list prices as of late 2026 (approximate; check the AWS p
 
 ## Summary
 
-| | Before review | After review |
-|---|---|---|
-| **dev**, fixed monthly cost | **≈ USD 43** (over the USD 40 budget) | **≈ USD 18** |
-| Catalog Lambda package | 39 MB (zip) | 22 MB |
-| Catalog cold invoke (local arm64 runtime) | ≈ 3.2 s | ≈ 2.6 s |
-| Web entry chunk | 508 kB (157 kB gzip) | 274 kB (87 kB gzip) |
+| | Before review | After review | With the shared database (#39) |
+|---|---|---|---|
+| **dev**, fixed monthly cost | **≈ USD 43** (over the USD 40 budget) | **≈ USD 18** | **≈ USD 10** |
+| Catalog Lambda package | 39 MB (zip) | 22 MB | |
+| Catalog cold invoke (local arm64 runtime) | ≈ 3.2 s | ≈ 2.6 s | |
+| Web entry chunk | 508 kB (157 kB gzip) | 274 kB (87 kB gzip) | |
 
 ## Monthly cost model (dev)
 
@@ -23,7 +23,18 @@ Region `eu-central-1`, list prices as of late 2026 (approximate; check the AWS p
 | Lambda, API Gateway, DynamoDB, SQS, EventBridge, SES, Cognito, CloudFront, S3, Amplify Hosting, X-Ray, CloudWatch Logs | ≈ 2 | ≈ 2 | free tiers / cents at dev traffic |
 | **Total** | **≈ 43** | **≈ 18** | **−58 %** |
 
-The S3 and DynamoDB **gateway** endpoints are free and stay. Budgets alert at 80 % actual and 100 % forecast (USD 40 dev, USD 120 prod).
+The S3 and DynamoDB **gateway** endpoints are free and stay.
+
+### Dev on a shared, existing database (#39)
+
+Dev can skip its own RDS instance and put the Catalog on an existing PostgreSQL that is already paid for (the owner's `database-1`, PostgreSQL 18 on a `db.t4g.micro` in eu-north-1). That removes the RDS rows above (5.1 + 2.7) but keeps a USD 0.4 secret for the dedicated login: **≈ USD 7.8 less, dev ≈ USD 10/month**. Cross-region traffic (USD 0.02/GB) rounds to zero at dev volume.
+
+- **How**: set `external_db_host` and `external_db_security_group_id` for `infra/envs/dev` (GitHub secrets `DEV_EXTERNAL_DB_HOST`, `DEV_EXTERNAL_DB_SG_ID`; never committed, the repo is public). Run `scripts/setup_external_db.sh` first: it creates the `meeton_dev` role and database, enables PostGIS with the master user and writes the `meeton-dev-catalog-db` secret. Without those variables dev creates its own RDS as before; prod always does.
+- **Network**: the in-VPC Lambdas leave through the NAT instance, which now has an Elastic IP; dev adds one ingress rule on the database's security group for exactly that `/32` (Terraform-managed, so `destroy` removes it). TLS (`sslmode=require`) on the wire.
+- **Isolation**: a separate database owned by a separate login, `CONNECTION LIMIT 20`, `statement_timeout 15s`, `idle_in_transaction_session_timeout 60s`, and `CONNECT` revoked from `PUBLIC`, so dev cannot starve or read the instance's other databases. It does share CPU, memory and disk with them.
+- **Cost of it**: ≈ 25 ms per query round trip Frankfurt–Stockholm (a search ≈ 50 ms slower, a cold start ≈ 100 ms more for the TLS handshake); fine for dev, not for prod.
+- **Verified**: the Catalog suite (104 tests) on PostgreSQL 18.6 + PostGIS 3.6 through the restricted `meeton_dev` login; RDS 18.3-R2 ships PostGIS 3.6.3 (AWS extension table).
+- **Remove**: `terraform destroy` for dev, then `scripts/setup_external_db.sh --drop`. Budgets alert at 80 % actual and 100 % forecast (USD 40 dev, USD 120 prod).
 
 ### Prod (not changed; recommendation)
 

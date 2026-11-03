@@ -86,6 +86,16 @@ resource "aws_instance" "nat" {
   }
 }
 
+# A fixed public IP, so external services (e.g. a database allowlist) can trust
+# this NAT across instance stop/start or replacement. Same price as the
+# auto-assigned public IPv4 it replaces.
+resource "aws_eip" "nat_instance" {
+  count    = var.nat == "instance" ? 1 : 0
+  domain   = "vpc"
+  instance = aws_instance.nat[0].id
+  tags     = { Name = "${var.name}-nat-instance" }
+}
+
 resource "aws_route" "private_nat_instance" {
   count                  = var.nat == "instance" ? 1 : 0
   route_table_id         = aws_route_table.private.id

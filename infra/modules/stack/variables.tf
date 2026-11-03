@@ -92,3 +92,18 @@ variable "rds_office_hours_only" {
   type        = bool
   default     = false
 }
+
+variable "external_catalog_db" {
+  description = <<-EOT
+    Use an existing PostgreSQL (with PostGIS) for the Catalog instead of creating RDS.
+    `secret_name` is a Secrets Manager secret in this region holding {"username","password"};
+    create it with scripts/setup_external_db.sh before the first apply. Dev only.
+  EOT
+  type = object({
+    host        = string
+    port        = optional(number, 5432)
+    db_name     = string
+    secret_name = string
+  })
+  default = null
+}

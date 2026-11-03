@@ -57,3 +57,8 @@ output "test_client_id" {
   description = "Dev only: Cognito client for integration-test logins."
   value       = module.cognito.test_client_id
 }
+
+output "egress_public_ip" {
+  description = "Public IPv4 the in-VPC Lambdas reach the internet from (allowlist it on external services)."
+  value       = module.network.egress_public_ip
+}

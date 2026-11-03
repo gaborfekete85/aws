@@ -31,7 +31,7 @@ flowchart LR
 
 | Service | Owns | Store | Publishes | Consumes |
 |---|---|---|---|---|
-| **Catalog** | Event, Location, Event status, Cover picture | PostgreSQL + PostGIS | `EventPublished`, `EventUpdated`, `EventCancelled` | — |
+| **Catalog** | Event, Location, Event status, Cover picture | PostgreSQL + PostGIS (own RDS; dev may use a shared instance, #39) | `EventPublished`, `EventUpdated`, `EventCancelled` | — |
 | **Booking** | Booking, Hold, Places counter | DynamoDB | `BookingRequested`, `BookingConfirmed`, `BookingCancelled`, `HoldExpired`, `EventBookingsCancelled` | `EventPublished`, `EventUpdated`, `EventCancelled`, `PaymentSucceeded`, `PaymentFailed` |
 | **Payments** | Checkout sessions | (Stripe + idempotency keys in DynamoDB) | `PaymentSucceeded`, `PaymentFailed` | `BookingRequested`, `HoldExpired` |
 | **Notifications** | Outgoing email | (sent markers in DynamoDB) | — | `BookingConfirmed`, `EventBookingsCancelled` (via SQS; ADR-0005) |

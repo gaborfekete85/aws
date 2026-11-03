@@ -24,8 +24,10 @@ module "api" {
   cors_allow_origins = local.web_origins
   log_retention_days = var.log_retention_days
   # Every route requires a valid Cognito ID token unless marked `public = true`.
-  jwt_issuer   = module.cognito.issuer
-  jwt_audience = compact([module.cognito.web_client_id, module.cognito.test_client_id])
+  jwt = {
+    issuer   = module.cognito.issuer
+    audience = compact([module.cognito.web_client_id, module.cognito.test_client_id])
+  }
 }
 
 locals {

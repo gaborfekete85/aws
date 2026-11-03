@@ -106,7 +106,7 @@ module "notifications" {
     NOTIFICATIONS_TABLE = aws_dynamodb_table.notifications.name
     SES_MAX_SEND_RATE   = tostring(var.ses_max_send_rate)
   })
-  policy_json = data.aws_iam_policy_document.notifications.json
+  policy = { json = data.aws_iam_policy_document.notifications.json }
   sqs_source = {
     queue_arn       = aws_sqs_queue.notifications.arn
     batch_size      = 5

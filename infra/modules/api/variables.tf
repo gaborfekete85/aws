@@ -27,14 +27,15 @@ variable "throttling_rate_limit" {
   default     = 50
 }
 
-variable "jwt_issuer" {
-  description = "JWT issuer (Cognito user pool URL). When null, no authorizer is created."
-  type        = string
-  default     = null
-}
-
-variable "jwt_audience" {
-  description = "Allowed JWT audiences (Cognito app client ids)."
-  type        = list(string)
-  default     = []
+variable "jwt" {
+  description = <<-EOT
+    JWT authorizer: issuer (Cognito user pool URL) and allowed audiences (app client ids).
+    When null, no authorizer is created. An object so that decision is known at plan
+    time even though the issuer of a not-yet-created user pool is not.
+  EOT
+  type = object({
+    issuer   = string
+    audience = list(string)
+  })
+  default = null
 }

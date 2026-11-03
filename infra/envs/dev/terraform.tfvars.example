@@ -1,3 +1,7 @@
 # Copy to terraform.tfvars (gitignored) for local plans/applies.
 alert_emails = ["you@example.com"]
 sender_email = "you@example.com"
+
+# Existing PostgreSQL for the Catalog (#39); leave out to create a dev RDS instead.
+# external_db_host              = "<instance>.<id>.eu-north-1.rds.amazonaws.com"
+# external_db_security_group_id = "sg-..."

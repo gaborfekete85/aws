@@ -60,10 +60,16 @@ variable "permissions_boundary_arn" {
   type        = string
 }
 
-variable "policy_json" {
-  description = "Extra IAM policy document (JSON) for the execution role, or null."
-  type        = string
-  default     = null
+variable "policy" {
+  description = <<-EOT
+    Extra IAM policy for the execution role, as { json = <policy document> }, or null.
+    An object so `count` stays decidable at plan time while the JSON (which usually
+    references not-yet-created ARNs) is still unknown.
+  EOT
+  type = object({
+    json = string
+  })
+  default = null
 }
 
 variable "vpc" {
@@ -112,10 +118,16 @@ variable "schedule_expression" {
   default     = null
 }
 
-variable "async_failure_queue_arn" {
-  description = "SQS queue receiving events whose async invocation failed after retries (DLQ)."
-  type        = string
-  default     = null
+variable "async_failure_queue" {
+  description = <<-EOT
+    SQS queue receiving events whose async invocation failed after retries (DLQ).
+    An object, not a bare ARN: the queue's ARN is unknown until apply, and `count`
+    must be decidable at plan time (null vs. not null).
+  EOT
+  type = object({
+    arn = string
+  })
+  default = null
 }
 
 variable "async_max_retries" {
